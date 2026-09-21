@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { construirBuscarTitulos } from './_composicion';
-import { prepararRespuesta, primerValor, responderError, soloMetodo } from './_http';
+import { construirBuscarTitulos } from '../backend/_composicion';
+import { prepararRespuesta, primerValor, responderError, soloMetodo } from '../backend/_http';
 
 // GET /api/buscar?q=batman&pagina=1
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {

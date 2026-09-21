@@ -1,15 +1,14 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { usuarioDeLaPeticion } from './_autenticar';
+import { usuarioDeLaPeticion } from '../backend/_autenticar';
 import {
   construirActualizarItemLista,
   construirAgregarALista,
   construirObtenerMiLista,
   construirQuitarDeLista,
-} from './_composicion';
-import { prepararRespuesta, primerValor, responderError } from './_http';
-import type { DatosActualizacion } from './dominio/casos-uso/ActualizarItemLista';
-import { ErrorDeValidacion } from './dominio/errores';
-
+} from '../backend/_composicion';
+import { prepararRespuesta, primerValor, responderError } from '../backend/_http';
+import type { DatosActualizacion } from '../backend/dominio/casos-uso/ActualizarItemLista';
+import { ErrorDeValidacion } from '../backend/dominio/errores';
 /**
  * Lista personal del usuario (requiere "Authorization: Bearer <token de Auth0>"):
  *   GET    /api/lista?estado=por_ver     -> lista (el filtro es opcional)

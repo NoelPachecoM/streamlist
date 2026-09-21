@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { construirObtenerDetalleTitulo } from './_composicion';
-import { prepararRespuesta, primerValor, responderError, soloMetodo } from './_http';
+import { construirObtenerDetalleTitulo } from '../backend/_composicion';
+import { prepararRespuesta, primerValor, responderError, soloMetodo } from '../backend/_http';
 
 // GET /api/detalle?id=550&tipo=pelicula&pais=MX
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
