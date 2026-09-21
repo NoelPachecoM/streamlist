@@ -1,0 +1,107 @@
+<main class="mi-lista">
+  <h1>Mi lista</h1>
+
+  @if (!auth.haIniciadoSesion()) {
+    <p>Inicia sesión para ver tu lista.</p>
+    <a routerLink="/login">Iniciar sesión</a>
+  } @else {
+    <div class="pestanas" role="tablist">
+      @for (e of estados; track e.valor) {
+        <button
+          type="button"
+          role="tab"
+          [class.activa]="pestana() === e.valor"
+          [attr.aria-selected]="pestana() === e.valor"
+          (click)="pestana.set(e.valor)"
+        >
+          {{ e.etiqueta }} ({{ contar(e.valor) }})
+        </button>
+      }
+    </div>
+
+    @if (cargando()) {
+      <p>Cargando tu lista...</p>
+    }
+
+    @if (error(); as mensaje) {
+      <p class="error">{{ mensaje }}</p>
+    }
+
+    @if (!cargando() && !error() && itemsVisibles().length === 0) {
+      <p class="vacio">No tienes títulos en esta pestaña.</p>
+    }
+
+    <section class="items">
+      @for (item of itemsVisibles(); track item.id) {
+        @let d = detalles()[clave(item)];
+        <article class="item">
+          @if (d && d.imagenPoster) {
+            <a [routerLink]="['/titulo', item.tipo, item.tmdbId]">
+              <img class="poster" [src]="d.imagenPoster" [alt]="'Póster de ' + d.nombre" loading="lazy" />
+            </a>
+          } @else {
+            <div class="sin-poster">Sin imagen</div>
+          }
+
+          <div class="contenido">
+            <h2>
+              @if (d) {
+                <a [routerLink]="['/titulo', item.tipo, item.tmdbId]">{{ d.nombre }}</a>
+              } @else {
+                Título #{{ item.tmdbId }}
+              }
+            </h2>
+
+            @if (d) {
+              <p class="meta">
+                <span class="tipo">{{ item.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+                @if (d.anio) {
+                  <span>{{ d.anio }}</span>
+                }
+              </p>
+            }
+
+            <label class="campo">
+              Estado
+              <select (change)="cambiarEstado(item, $any($event.target).value)" [disabled]="ocupado() === item.id">
+                @for (e of estados; track e.valor) {
+                  <option [value]="e.valor" [selected]="e.valor === item.estado">{{ e.etiqueta }}</option>
+                }
+              </select>
+            </label>
+
+            @if (item.estado === 'vista') {
+              <label class="campo">
+                Mi calificación
+                <select (change)="calificar(item, $any($event.target).value)" [disabled]="ocupado() === item.id">
+                  <option value="" [selected]="item.calificacion === null">Sin calificar</option>
+                  @for (n of calificaciones; track n) {
+                    <option [value]="n" [selected]="item.calificacion === n">{{ n }}</option>
+                  }
+                </select>
+              </label>
+
+              <label class="campo resena">
+                Mi reseña
+                <textarea #texto rows="3" placeholder="Escribe tu reseña...">{{ item.resena ?? '' }}</textarea>
+              </label>
+              <button type="button" (click)="guardarResena(item, texto.value)" [disabled]="ocupado() === item.id">
+                Guardar reseña
+              </button>
+            } @else {
+              <p class="nota">Podrás calificarla y dejar una reseña cuando la marques como vista.</p>
+            }
+
+            <button type="button" class="quitar" (click)="quitar(item)" [disabled]="ocupado() === item.id">
+              Quitar de mi lista
+            </button>
+
+            @if (mensajes()[item.id]; as texto) {
+              <p class="mensaje">{{ texto }}</p>
+            }
+          </div>
+        </article>
+      }
+    </section>
+  }
+</main>

@@ -1,0 +1,87 @@
+.barra {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.logo {
+  font-weight: bold;
+  font-size: 1.25rem;
+  text-decoration: none;
+  color: inherit;
+}
+
+.cuenta {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.buscar {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.formulario {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+.formulario input {
+  flex: 1;
+  padding: 0.6rem 0.8rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 1.25rem;
+}
+
+.tarjeta img,
+.sin-poster {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+
+.sin-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.info h2 {
+  font-size: 1rem;
+  margin: 0.5rem 0 0.25rem;
+}
+
+.meta {
+  display: flex;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: #555;
+  margin: 0;
+}
+
+.error {
+  color: #b00020;
+}
+
+.mas {
+  display: block;
+  margin: 2rem auto 0;
+}
+
+.enlace-tarjeta {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}

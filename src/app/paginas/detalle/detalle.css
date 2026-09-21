@@ -1,0 +1,116 @@
+.detalle {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.volver {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+}
+
+.cabecera {
+  display: flex;
+  gap: 2rem;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+
+.poster,
+.sin-poster {
+  width: 240px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+
+.sin-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.datos {
+  flex: 1;
+  min-width: 260px;
+}
+
+.meta {
+  display: flex;
+  gap: 0.75rem;
+  color: #555;
+}
+
+.generos {
+  color: #555;
+}
+
+.bloque {
+  margin-top: 2.5rem;
+}
+
+.reparto {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.persona {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.85rem;
+}
+
+.persona img,
+.sin-foto {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+
+.sin-foto {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+}
+
+.plataformas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.plataforma {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.plataforma img {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+}
+
+.error {
+  color: #b00020;
+}
+.lista {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.mensaje {
+  flex-basis: 100%;
+  margin: 0;
+  color: #555;
+}

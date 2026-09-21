@@ -1,0 +1,50 @@
+
+
+<main class="buscar">
+  <form class="formulario" (submit)="$event.preventDefault(); buscar(caja.value)">
+    <input #caja type="search" placeholder="Busca una película o serie..." autocomplete="off" />
+    <button type="submit">Buscar</button>
+  </form>
+
+  @if (error(); as mensaje) {
+    <p class="error">{{ mensaje }}</p>
+  }
+
+  @if (buscado() && !cargando() && !error() && resultados().length === 0) {
+    <p class="vacio">No encontramos resultados para "{{ termino() }}".</p>
+  }
+
+    <section class="grid">
+    @for (titulo of resultados(); track titulo.tipo + titulo.tmdbId) {
+      <a class="enlace-tarjeta" [routerLink]="['/titulo', titulo.tipo, titulo.tmdbId]">
+        <article class="tarjeta">
+          @if (titulo.imagenPoster) {
+            <img [src]="titulo.imagenPoster" [alt]="'Póster de ' + titulo.nombre" loading="lazy" />
+          } @else {
+            <div class="sin-poster">Sin imagen</div>
+          }
+          <div class="info">
+            <h2>{{ titulo.nombre }}</h2>
+            <p class="meta">
+              <span class="tipo">{{ titulo.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+              @if (titulo.anio) {
+                <span>{{ titulo.anio }}</span>
+              }
+              @if (titulo.calificacion) {
+                <span>★ {{ titulo.calificacion.toFixed(1) }}</span>
+              }
+            </p>
+          </div>
+        </article>
+      </a>
+    }
+  </section>
+
+  @if (cargando()) {
+    <p class="cargando">Cargando...</p>
+  }
+
+  @if (hayMas() && !cargando()) {
+    <button type="button" class="mas" (click)="cargarMas()">Cargar más</button>
+  }
+</main>

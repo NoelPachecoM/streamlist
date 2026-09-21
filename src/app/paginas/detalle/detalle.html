@@ -1,0 +1,102 @@
+<main class="detalle">
+  <a routerLink="/buscar" class="volver">← Volver a buscar</a>
+
+  @if (cargando()) {
+    <p class="cargando">Cargando...</p>
+  }
+
+  @if (error(); as mensaje) {
+    <p class="error">{{ mensaje }}</p>
+  }
+
+  @if (titulo(); as t) {
+    <section class="cabecera">
+      @if (t.imagenPoster) {
+        <img class="poster" [src]="t.imagenPoster" [alt]="'Póster de ' + t.nombre" />
+      } @else {
+        <div class="sin-poster">Sin imagen</div>
+      }
+
+      <div class="datos">
+        <h1>{{ t.nombre }}</h1>
+        <p class="meta">
+          <span class="tipo">{{ t.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+          @if (t.anio) {
+            <span>{{ t.anio }}</span>
+          }
+          @if (t.calificacion) {
+            <span>★ {{ t.calificacion.toFixed(1) }}</span>
+          }
+        </p>
+        @if (t.generos.length > 0) {
+          <p class="generos">{{ t.generos.join(', ') }}</p>
+        }
+        <p class="sinopsis">{{ t.sinopsis || 'Sin sinopsis disponible.' }}</p>
+        
+        <div class="lista">
+          @if (auth.haIniciadoSesion()) {
+            <label for="estado">{{ item() ? 'En tu lista como:' : 'Agregar a mi lista como:' }}</label>
+            <select id="estado" (change)="estadoElegido.set($any($event.target).value)">
+              @for (e of estados; track e.valor) {
+                <option [value]="e.valor" [selected]="e.valor === estadoElegido()">{{ e.etiqueta }}</option>
+              }
+            </select>
+            <button type="button" (click)="guardar()" [disabled]="guardando()">
+              {{ item() ? 'Actualizar estado' : 'Agregar a mi lista' }}
+            </button>
+            @if (item()) {
+              <button type="button" class="quitar" (click)="quitar()" [disabled]="guardando()">
+                Quitar de mi lista
+              </button>
+            }
+          } @else {
+            <a routerLink="/login">Inicia sesión para agregar a tu lista</a>
+          }
+          @if (mensaje(); as texto) {
+            <p class="mensaje">{{ texto }}</p>
+          }
+        </div>
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h2>Reparto</h2>
+      @if (t.reparto.length === 0) {
+        <p>No hay información de reparto.</p>
+      }
+      <div class="reparto">
+        @for (persona of t.reparto; track $index) {
+          <div class="persona">
+            @if (persona.imagenPerfil) {
+              <img [src]="persona.imagenPerfil" [alt]="persona.nombre" loading="lazy" />
+            } @else {
+              <div class="sin-foto">Sin foto</div>
+            }
+            <strong>{{ persona.nombre }}</strong>
+            <span>{{ persona.personaje }}</span>
+          </div>
+        }
+      </div>
+    </section>
+
+    <section class="bloque">
+      <h2>Dónde verla</h2>
+      @if (grupos().length === 0) {
+        <p>No hay información de plataformas para tu país.</p>
+      }
+      @for (grupo of grupos(); track grupo.nombre) {
+        <h3>{{ grupo.nombre }}</h3>
+        <div class="plataformas">
+          @for (plataforma of grupo.plataformas; track plataforma.nombre) {
+            <div class="plataforma">
+              @if (plataforma.logo) {
+                <img [src]="plataforma.logo" [alt]="plataforma.nombre" />
+              }
+              <span>{{ plataforma.nombre }}</span>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  }
+</main>

@@ -1,0 +1,95 @@
+.mi-lista {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 2rem 1rem;
+}
+
+.pestanas {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.pestanas button.activa {
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+.items {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.item {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+.poster,
+.sin-poster {
+  width: 120px;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: #eee;
+}
+
+.sin-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #777;
+  font-size: 0.85rem;
+}
+
+.contenido {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  align-items: flex-start;
+}
+
+.contenido h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.meta {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0;
+  color: #555;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.9rem;
+}
+
+.resena {
+  width: 100%;
+}
+
+.resena textarea {
+  width: 100%;
+  max-width: 500px;
+}
+
+.nota,
+.mensaje {
+  margin: 0;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.error {
+  color: #b00020;
+}

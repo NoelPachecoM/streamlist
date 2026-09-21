@@ -1,0 +1,15 @@
+<main class="login">
+  <h1>StreamList</h1>
+
+  @if (auth.usuario(); as usuario) {
+    <p>Hola, {{ usuario.nombre }}</p>
+    <p>{{ usuario.correo }}</p>
+    <button type="button" (click)="auth.cerrarSesion()">Cerrar sesión</button>
+  } @else {
+    <p>Inicia sesión para guardar tu lista de películas y series.</p>
+  }
+
+  <div #botonGoogle [hidden]="auth.haIniciadoSesion()"></div>
+
+  <a routerLink="/buscar">Ir a buscar películas</a>
+</main>

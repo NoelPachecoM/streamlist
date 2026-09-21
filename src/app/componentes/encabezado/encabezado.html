@@ -1,0 +1,17 @@
+<header class="barra">
+  <a routerLink="/buscar" class="logo">StreamList</a>
+
+  <nav class="menu">
+    <a routerLink="/buscar" routerLinkActive="activo">Buscar</a>
+    <a routerLink="/mi-lista" routerLinkActive="activo">Mi lista</a>
+  </nav>
+
+  <div class="cuenta">
+    @if (auth.usuario(); as usuario) {
+      <span>{{ usuario.nombre }}</span>
+      <button type="button" (click)="auth.cerrarSesion()">Cerrar sesión</button>
+    } @else {
+      <a routerLink="/login">Iniciar sesión</a>
+    }
+  </div>
+</header>
