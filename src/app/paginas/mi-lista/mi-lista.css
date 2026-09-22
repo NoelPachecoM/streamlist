@@ -1,161 +1,121 @@
-.mi-lista {
-  max-width: 1080px;
-  margin: 0 auto;
-  padding: 32px 20px 48px;
+/* ============================================
+   mi-lista.css — Mi Lista personal
+   Tabs por estado, toggle grid/lista y tarjetas
+   con franja de color inferior por estado
+   ============================================ */
+
+.mi-lista__header {
+  margin-bottom: 22px;
 }
 
-.mi-lista h1 {
-  margin-bottom: 18px;
-  font-size: clamp(2rem, 4vw, 2.6rem);
-}
-
-.pestanas {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1.5rem;
-}
-
-.pestanas button {
-  padding: 0.6rem 0.9rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-full);
-  background: var(--color-surface-2);
-  color: var(--color-muted);
-  transition: all var(--transition-fast);
-}
-
-.pestanas button.activa {
-  background: var(--color-pink);
-  border-color: var(--color-pink);
-  color: #fff;
+.mi-lista__title {
+  font-size: 22px;
   font-weight: 700;
+  margin-bottom: 4px;
 }
 
-.items {
+.mi-lista__subtitle {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+/* --- Barra de tabs + toggle de vista --- */
+.mi-lista__toolbar {
   display: flex;
-  flex-direction: column;
-  gap: 1.25rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+  gap: 14px;
 }
 
-.item {
+.mi-lista__tabs {
   display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-  padding: 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-xl);
-  background: var(--color-surface);
+  background: var(--bg-elevated);
+  border-radius: var(--radius-pill);
+  padding: 4px;
+  gap: 2px;
 }
 
-.poster,
-.sin-poster {
-  width: 120px;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-2);
+.mi-lista__tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.sin-poster {
+.mi-lista__tab--active {
+  background: var(--accent-teal);
+  color: #06060a;
+}
+
+.mi-lista__tab-count {
+  font-size: 11px;
+  opacity: 0.75;
+}
+
+.mi-lista__view-toggle {
+  display: flex;
+  gap: 4px;
+}
+.mi-lista__view-btn {
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-muted);
-  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+}
+.mi-lista__view-btn--active {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+.mi-lista__view-icon {
+  width: 16px;
+  height: 16px;
 }
 
-.contenido {
-  flex: 1;
+/* --- Grid de tarjetas --- */
+.mi-lista__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 18px;
+}
+
+/* Vista de lista (alternativa al grid) */
+.mi-lista__list {
   display: flex;
   flex-direction: column;
-  gap: 0.6rem;
+  gap: 10px;
 }
-
-.contenido h2 {
-  font-size: 1.15rem;
-}
-
-.contenido h2 a {
-  color: var(--color-text);
-}
-
-.meta {
+.mi-lista__list-item {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  color: var(--color-muted);
-}
-
-.campo {
-  display: flex;
-  flex-direction: column;
-  gap: 0.3rem;
-  color: var(--color-muted);
-}
-
-.campo select,
-.campo textarea,
-.contenido button,
-.quitar,
-.contenido a {
+  align-items: center;
+  gap: 14px;
+  background: var(--bg-card);
   border-radius: var(--radius-md);
-  font: inherit;
+  padding: 10px;
 }
-
-.campo select,
-.campo textarea {
-  border: 1px solid var(--color-border);
-  background: var(--color-surface-2);
-  color: var(--color-text);
-  padding: 0.6rem 0.75rem;
-}
-
-.campo textarea {
-  width: min(100%, 500px);
-  min-height: 72px;
-  resize: vertical;
-}
-
-.contenido button,
-.quitar {
-  width: fit-content;
-  padding: 0.7rem 0.9rem;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
-  color: #fff;
-  font-weight: 600;
-}
-
-.quitar {
-  background: rgba(229, 57, 53, 0.12);
-  color: #ef9a9a;
-}
-
-.nota,
-.mensaje,
-.error,
-.vacio {
-  color: var(--color-muted);
-}
-
-.error {
-  color: #ff9aa7;
+.mi-lista__list-poster {
+  width: 44px;
+  height: 66px;
+  border-radius: var(--radius-sm);
+  object-fit: cover;
+  flex-shrink: 0;
 }
 
 @media (max-width: 640px) {
-  .mi-lista {
-    padding-inline: 14px;
+  .mi-lista__grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
   }
-
-  .item {
-    flex-direction: column;
-  }
-
-  .poster,
-  .sin-poster {
-    width: 100%;
-    max-width: 180px;
+  .mi-lista__tabs {
+    overflow-x: auto;
   }
 }

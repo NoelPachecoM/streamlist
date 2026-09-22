@@ -1,131 +1,122 @@
-.buscar {
-  max-width: 1120px;
-  margin: 0 auto;
-  padding: 32px 20px 48px;
+/* ============================================
+   buscar.css — Explorar catálogo
+   Búsqueda, filtros tipo pill y grid de pósters
+   ============================================ */
+
+.buscar__title {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 18px;
 }
 
-.formulario {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  margin-bottom: 24px;
-}
-
-.formulario input {
-  flex: 1 1 320px;
-  min-width: 0;
-  padding: 12px 16px;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-md);
-  background: var(--color-surface-2);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
-}
-
-.formulario input::placeholder {
-  color: var(--color-muted);
-}
-
-.formulario input:focus {
-  border-color: var(--color-pink);
-  box-shadow: 0 0 0 3px rgba(233, 30, 140, 0.12);
-}
-
-.formulario button,
-.mas {
-  padding: 12px 18px;
-  border: 0;
-  border-radius: var(--radius-md);
-  background: linear-gradient(90deg, var(--color-pink), var(--color-purple));
-  color: #fff;
-  font-weight: 600;
-  transition: opacity var(--transition-fast), transform var(--transition-fast);
-}
-
-.formulario button:hover,
-.mas:hover {
-  opacity: 0.96;
-  transform: translateY(-1px);
-}
-
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-  gap: 20px;
-}
-
-.tarjeta {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.tarjeta img,
-.sin-poster {
-  width: 100%;
-  aspect-ratio: 2 / 3;
-  object-fit: cover;
-  border-radius: var(--radius-lg);
-  background: var(--color-surface-2);
-}
-
-.sin-poster {
+.buscar__search {
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: var(--color-muted);
-  border: 1px solid var(--color-border);
+  gap: 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  padding: 11px 14px;
+  margin-bottom: 16px;
+  max-width: 520px;
+}
+.buscar__search-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+.buscar__search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: var(--text-primary);
+}
+.buscar__search-input::placeholder {
+  color: var(--text-muted);
+}
+.buscar__search-clear {
+  color: var(--text-muted);
+  width: 16px;
+  height: 16px;
 }
 
-.enlace-tarjeta {
-  display: block;
-  color: inherit;
-  text-decoration: none;
-}
-
-.info h2 {
-  margin: 0 0 4px;
-  font-size: 1rem;
-  line-height: 1.3;
-}
-
-.meta {
+/* --- Filtros tipo pill --- */
+.buscar__filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.5rem;
-  color: var(--color-muted);
-  font-size: 0.85rem;
+  gap: 10px;
+  margin-bottom: 22px;
 }
 
-.error,
-.vacio,
-.cargando {
-  margin: 0 0 18px;
-  color: var(--color-muted);
+.filter-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-pill);
+  padding: 8px 14px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+}
+.filter-pill:hover {
+  border-color: var(--text-muted);
+}
+.filter-pill--active {
+  background: rgba(20, 184, 166, 0.16);
+  border-color: var(--accent-teal);
+  color: var(--accent-teal);
+  font-weight: 600;
+}
+.filter-pill__chevron {
+  width: 12px;
+  height: 12px;
 }
 
-.error {
-  color: #ff9aa7;
+/* --- Resultado + orden --- */
+.buscar__result-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.buscar__result-count {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+.buscar__result-count strong {
+  color: var(--text-primary);
+}
+.buscar__sort {
+  font-size: 13px;
+  color: var(--text-secondary);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.buscar__sort strong {
+  color: var(--accent-cyan);
+  font-weight: 600;
 }
 
-.mas {
-  display: block;
-  margin: 28px auto 0;
+/* --- Grid de resultados (relación 2:3) --- */
+.buscar__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 18px;
 }
 
 @media (max-width: 640px) {
-  .buscar {
-    padding-inline: 14px;
+  .buscar__grid {
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 14px;
   }
-
-  .grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  .buscar__filters {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding-bottom: 4px;
   }
-}
-
-.movie-grid-item__meta {
-  font-size: 10px;
-  color: var(--color-muted);
-  margin-top: 2px;
 }

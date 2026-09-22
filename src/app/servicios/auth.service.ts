@@ -35,6 +35,7 @@ function estaVigente(token: string): boolean {
 export class AuthService {
   private readonly _token = signal<string | null>(null);
   private temporizador?: ReturnType<typeof setTimeout>;
+  private googleInicializado = false;
 
   readonly usuario = computed<UsuarioSesion | null>(() => {
     const token = this._token();
@@ -67,18 +68,40 @@ export class AuthService {
 
   /** Dibuja el botón oficial "Iniciar sesión con Google" dentro del elemento dado. */
   mostrarBotonGoogle(contenedor: HTMLElement): void {
-    this.esperarGoogle().then(() => {
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: (respuesta: { credential: string }) => this.guardarSesion(respuesta.credential),
-      });
+    const renderizar = () => {
+      if (typeof google === 'undefined' || !google.accounts?.id) {
+        return;
+      }
+
+      contenedor.innerHTML = '';
+
+      if (!this.googleInicializado) {
+        google.accounts.id.initialize({
+          client_id: GOOGLE_CLIENT_ID,
+          callback: (respuesta: { credential: string }) => this.guardarSesion(respuesta.credential),
+          auto_select: false,
+          cancel_on_tap_outside: true,
+        });
+        this.googleInicializado = true;
+      }
+
       google.accounts.id.renderButton(contenedor, {
         theme: 'outline',
         size: 'large',
         shape: 'pill',
         text: 'signin_with',
         locale: 'es',
+        width: Math.max(contenedor.clientWidth || 280, 220),
       });
+    };
+
+    if (typeof google !== 'undefined' && google.accounts?.id) {
+      renderizar();
+      return;
+    }
+
+    this.esperarGoogle().then(renderizar).catch(() => {
+      console.warn('Google SDK no disponible en este momento.');
     });
   }
 
@@ -105,11 +128,19 @@ export class AuthService {
   }
 
   private esperarGoogle(): Promise<void> {
-    return new Promise((resolver) => {
+    return new Promise((resolver, rechazar) => {
+      const maxMs = 10000;
+      const inicio = Date.now();
       const intervalo = setInterval(() => {
         if (typeof google !== 'undefined' && google.accounts?.id) {
           clearInterval(intervalo);
           resolver();
+          return;
+        }
+
+        if (Date.now() - inicio >= maxMs) {
+          clearInterval(intervalo);
+          rechazar(new Error('Google SDK no cargó a tiempo'));
         }
       }, 100);
     });
