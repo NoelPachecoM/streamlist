@@ -1,122 +1,136 @@
-/* ============================================
-   buscar.css — Explorar catálogo
-   Búsqueda, filtros tipo pill y grid de pósters
-   ============================================ */
 
-.buscar__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 18px;
+:host {
+  display: block;
 }
 
-.buscar__search {
+.buscar {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
+}
+
+.formulario {
   display: flex;
   align-items: center;
-  gap: 10px;
-  background: var(--bg-input);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-md);
-  padding: 11px 14px;
-  margin-bottom: 16px;
-  max-width: 520px;
+  gap: 0.75rem;
+  max-width: 40rem;
+  margin-bottom: 1.5rem;
 }
-.buscar__search-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--text-muted);
-  flex-shrink: 0;
-}
-.buscar__search-input {
+
+.formulario input {
   flex: 1;
-  background: transparent;
+  min-width: 0;
+  padding: 0.8rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.formulario input::placeholder {
+  color: var(--color-muted);
+}
+
+.formulario button,
+.mas {
+  padding: 0.8rem 1.1rem;
   border: none;
-  font-size: 14px;
-  color: var(--text-primary);
-}
-.buscar__search-input::placeholder {
-  color: var(--text-muted);
-}
-.buscar__search-clear {
-  color: var(--text-muted);
-  width: 16px;
-  height: 16px;
+  border-radius: var(--radius-md);
+  background: linear-gradient(90deg, var(--color-pink), var(--color-cyan));
+  color: #fff;
+  font-weight: 700;
+  cursor: pointer;
 }
 
-/* --- Filtros tipo pill --- */
-.buscar__filters {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  margin-bottom: 22px;
+.error,
+.vacio,
+.cargando {
+  margin-bottom: 1rem;
+  color: var(--color-muted);
 }
 
-.filter-pill {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-pill);
-  padding: 8px 14px;
-  font-size: 13px;
-  color: var(--text-secondary);
-  transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
-}
-.filter-pill:hover {
-  border-color: var(--text-muted);
-}
-.filter-pill--active {
-  background: rgba(20, 184, 166, 0.16);
-  border-color: var(--accent-teal);
-  color: var(--accent-teal);
-  font-weight: 600;
-}
-.filter-pill__chevron {
-  width: 12px;
-  height: 12px;
+.error {
+  color: #ff9ab4;
 }
 
-/* --- Resultado + orden --- */
-.buscar__result-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 18px;
-}
-.buscar__result-count {
-  font-size: 13px;
-  color: var(--text-secondary);
-}
-.buscar__result-count strong {
-  color: var(--text-primary);
-}
-.buscar__sort {
-  font-size: 13px;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.buscar__sort strong {
-  color: var(--accent-cyan);
-  font-weight: 600;
-}
-
-/* --- Grid de resultados (relación 2:3) --- */
-.buscar__grid {
+.grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 18px;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.25rem;
+}
+
+.enlace-tarjeta {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+}
+
+.tarjeta {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: transform var(--transition-normal), border-color var(--transition-fast);
+}
+
+.tarjeta:hover {
+  transform: translateY(-2px);
+  border-color: var(--color-pink);
+}
+
+.tarjeta img,
+.sin-poster {
+  display: block;
+  width: 100%;
+  height: 260px;
+  object-fit: cover;
+  background: var(--color-surface-2);
+}
+
+.sin-poster {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.info {
+  padding: 0.85rem 0.9rem 1rem;
+}
+
+.info h2 {
+  font-size: 1rem;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.meta {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.35rem;
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.tipo {
+  color: var(--color-cyan);
+}
+
+.mas {
+  margin-top: 1rem;
 }
 
 @media (max-width: 640px) {
-  .buscar__grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 14px;
+  .formulario {
+    flex-direction: column;
+    align-items: stretch;
   }
-  .buscar__filters {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    padding-bottom: 4px;
+
+  .formulario button,
+  .mas {
+    width: 100%;
   }
 }

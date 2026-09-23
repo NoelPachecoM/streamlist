@@ -1,54 +1,34 @@
-/* ============================================
-   StreamList — Estilos globales
-   Variables de marca, reset y componentes
-   compartidos entre pantallas (tarjetas de
-   película, badges de rating, botones).
-   ============================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Geist:wght@400;500;600;700&display=swap');
 
 :root {
-  /* Fondo */
-  --bg-app: #0a0a12;
-  --bg-sidebar: #0d0d18;
-  --bg-card: #15151f;
-  --bg-card-hover: #1c1c2b;
-  --bg-input: #181822;
-  --bg-elevated: #1a1a26;
+  --color-bg: #07070a;
+  --color-surface: #12121e;
+  --color-surface-2: #07070a;
+  --color-surface-3: #1f1f35;
 
-  /* Bordes */
-  --border-subtle: #ffffff14;
-  --border-strong: #ffffff26;
+  --color-pink: #ff2e93;
+  --color-pink-dim: #a01460;
+  --color-cyan: #00e5ff;
+  --color-purple: #9b30ff;
+  --color-gold: #ffc700;
 
-  /* Texto */
-  --text-primary: #f5f5fa;
-  --text-secondary: #9a9ab0;
-  --text-muted: #6c6c82;
+  --color-text: #ffffff;
+  --color-muted: #a5a6c2;
+  --color-border: #1f1f35;
 
-  /* Marca */
-  --accent-pink: #ec4899;
-  --accent-cyan: #22d3ee;
-  --accent-teal: #14b8a6;
-  --accent-blue: #3b82f6;
-  --accent-gold: #fbbf24;
-  --gradient-brand: linear-gradient(135deg, var(--accent-pink) 0%, var(--accent-cyan) 100%);
+  --font-display: 'Outfit', sans-serif;
+  --font-body: 'Geist', sans-serif;
 
-  /* Estados de "Mi Lista" */
-  --estado-viendo: var(--accent-teal);
-  --estado-por-ver: var(--accent-blue);
-  --estado-vista: var(--text-muted);
-
-  /* Radios y sombras */
   --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 18px;
-  --radius-pill: 999px;
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.45);
-  --shadow-float: 0 4px 14px rgba(0, 0, 0, 0.5);
+  --radius-md: 8px;
+  --radius-lg: 12px;
+  --radius-xl: 16px;
+  --radius-full: 999px;
 
-  /* Tipografía */
-  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-
-  /* Layout */
-  --sidebar-width: 232px;
+  --transition-fast: 150ms ease;
+  --transition-normal: 250ms ease;
+  --transition-slow: 350ms ease;
 }
 
 * {
@@ -56,22 +36,34 @@
 }
 
 html, body {
-  height: 100%;
   margin: 0;
-  padding: 0;
+  min-height: 100%;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
-  background: var(--bg-app);
-  color: var(--text-primary);
-  font-family: var(--font-sans);
-  font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
 }
 
-h1, h2, h3, h4, p {
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  line-height: 1.15;
+  color: var(--color-text);
   margin: 0;
+}
+
+p {
+  margin: 0;
+  font-family: var(--font-body);
+  color: rgba(240, 238, 255, 0.8);
+  line-height: 1.65;
 }
 
 a {
@@ -79,181 +71,45 @@ a {
   text-decoration: none;
 }
 
-button, input, select {
-  font-family: inherit;
-  color: inherit;
+button, input, select, textarea {
+  font: inherit;
 }
 
-button {
-  cursor: pointer;
-  border: none;
-  background: none;
-}
-
-img {
-  max-width: 100%;
-  display: block;
-}
-
-/* Scrollbar discreto, estilo streaming */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 4px;
+  height: 4px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: var(--radius-pill);
+  background: #1f1f35;
+  border-radius: 2px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--text-muted);
+  background: #9b30ff;
 }
 
-/* Foco visible accesible en toda la app */
-:focus-visible {
-  outline: 2px solid var(--accent-cyan);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
+.gradient-primary {
+  background: linear-gradient(90deg, var(--color-pink), var(--color-cyan));
 }
 
-/* ---------- Botón primario (gradiente de marca) ---------- */
-.btn-primary {
-  background: var(--gradient-brand);
-  color: #06060a;
-  font-weight: 600;
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  transition: transform 0.15s ease, filter 0.15s ease;
-}
-.btn-primary:hover {
-  filter: brightness(1.08);
-  transform: translateY(-1px);
-}
-.btn-primary:active {
-  transform: translateY(0);
+.gradient-hero-overlay {
+  background:
+    linear-gradient(90deg, rgba(7, 7, 15, 0.95) 0%, rgba(7, 7, 15, 0.7) 50%, transparent 100%),
+    linear-gradient(0deg, rgba(7, 7, 15, 0.8) 0%, transparent 40%);
 }
 
-.btn-secondary {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border-strong);
-  color: var(--text-primary);
-  font-weight: 500;
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  transition: background 0.15s ease, border-color 0.15s ease;
-}
-.btn-secondary:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--text-muted);
-}
-
-/* ---------- Tarjeta de película (usada en Descubrir, Explorar y Mi Lista) ---------- */
-.movie-card {
-  position: relative;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-.movie-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-card);
-}
-.movie-card__poster-wrap {
-  position: relative;
-  aspect-ratio: 2 / 3;
-  background: var(--bg-elevated);
-  overflow: hidden;
-}
-.movie-card__poster {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.movie-card__body {
-  padding: 10px 12px 12px;
-}
-.movie-card__title {
-  font-size: 13.5px;
-  font-weight: 600;
-  color: var(--text-primary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.movie-card__meta {
-  font-size: 12px;
-  color: var(--text-muted);
-  margin-top: 2px;
-}
-
-/* Badge flotante de calificación, esquina superior izquierda del póster */
-.rating-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  background: rgba(10, 10, 18, 0.78);
-  backdrop-filter: blur(4px);
-  color: var(--accent-gold);
-  font-size: 12px;
-  font-weight: 600;
-  padding: 3px 7px;
-  border-radius: var(--radius-pill);
-}
-.rating-badge__icon {
-  width: 11px;
-  height: 11px;
-}
-
-/* Etiqueta tipo pill (recomendación, tipo de contenido, etc.) */
-.tag-pill {
-  display: inline-flex;
-  align-items: center;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-  padding: 4px 10px;
-  border-radius: var(--radius-pill);
-}
-.tag-pill--brand {
-  background: var(--gradient-brand);
-  color: #06060a;
-}
-
-/* Franja de color inferior por estado, usada en Mi Lista */
-.movie-card__status-stripe {
-  height: 4px;
-  width: 100%;
-}
-.movie-card__status-stripe--viendo { background: var(--estado-viendo); }
-.movie-card__status-stripe--por-ver { background: var(--estado-por-ver); }
-.movie-card__status-stripe--vista { background: var(--estado-vista); }
-
-/* Encabezado de sección reutilizable (Continuar Viendo, Tendencias, etc.) */
-.section-title {
-  font-size: 17px;
-  font-weight: 600;
-  margin-bottom: 14px;
-}
-
-/* Contenedor principal de cada página, al lado del sidebar */
-.page-content {
-  margin-left: var(--sidebar-width);
-  padding: 32px 40px 60px;
-  min-height: 100vh;
-}
-
-@media (max-width: 900px) {
-  :root {
-    --sidebar-width: 0px;
+@media print {
+  .no-print {
+    display: none !important;
   }
-  .page-content {
-    padding: 20px 16px 100px;
+
+  body {
+    background: white;
+    color: black;
   }
 }

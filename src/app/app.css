@@ -1,24 +1,11 @@
-/* ============================================
-   app.css — layout raíz de la aplicación
-   ============================================ */
 
-.app-shell {
-  display: flex;
+:host {
+  display: block;
   min-height: 100vh;
-  background: var(--bg-app);
+  background: var(--color-bg);
+  color: var(--color-text);
 }
 
-/* El router-outlet no debe romper el flujo flex */
-router-outlet {
-  display: none;
-}
-
-/* Transición suave entre rutas */
-.app-shell > * {
-  animation: app-fade-in 0.2s ease;
-}
-
-@keyframes app-fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+:host > * {
+  display: block;
 }

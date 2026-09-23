@@ -1,121 +1,169 @@
-/* ============================================
-   mi-lista.css — Mi Lista personal
-   Tabs por estado, toggle grid/lista y tarjetas
-   con franja de color inferior por estado
-   ============================================ */
-
-.mi-lista__header {
-  margin-bottom: 22px;
+:host {
+  display: block;
 }
 
-.mi-lista__title {
-  font-size: 22px;
-  font-weight: 700;
-  margin-bottom: 4px;
+.mi-lista {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 2rem 1.25rem 3rem;
 }
 
-.mi-lista__subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
+.mi-lista h1 {
+  font-size: clamp(2rem, 4vw, 2.5rem);
 }
 
-/* --- Barra de tabs + toggle de vista --- */
-.mi-lista__toolbar {
+.pestanas {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 26px;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
 }
 
-.mi-lista__tabs {
+.pestanas button {
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-full);
+  background: var(--color-surface-2);
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+}
+
+.pestanas button.activa {
+  background: rgba(0, 229, 255, 0.12);
+  border-color: var(--color-cyan);
+  color: var(--color-text);
+}
+
+.items {
   display: flex;
-  background: var(--bg-elevated);
-  border-radius: var(--radius-pill);
-  padding: 4px;
-  gap: 2px;
+  flex-direction: column;
+  gap: 1rem;
 }
 
-.mi-lista__tab {
+.item {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 8px 16px;
-  border-radius: var(--radius-pill);
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  transition: background 0.15s ease, color 0.15s ease;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
 }
 
-.mi-lista__tab--active {
-  background: var(--accent-teal);
-  color: #06060a;
+.poster {
+  width: 110px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 0.8rem;
+  background: var(--color-surface-2);
 }
 
-.mi-lista__tab-count {
-  font-size: 11px;
-  opacity: 0.75;
-}
-
-.mi-lista__view-toggle {
-  display: flex;
-  gap: 4px;
-}
-.mi-lista__view-btn {
-  width: 32px;
-  height: 32px;
+.sin-poster {
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: var(--radius-sm);
-  color: var(--text-muted);
-}
-.mi-lista__view-btn--active {
-  background: var(--bg-elevated);
-  color: var(--text-primary);
-}
-.mi-lista__view-icon {
-  width: 16px;
-  height: 16px;
+  width: 110px;
+  height: 160px;
+  background: var(--color-surface-2);
+  border: 1px solid var(--color-border);
+  border-radius: 0.8rem;
+  color: var(--color-muted);
 }
 
-/* --- Grid de tarjetas --- */
-.mi-lista__grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 18px;
+.contenido {
+  flex: 1;
+  min-width: 0;
 }
 
-/* Vista de lista (alternativa al grid) */
-.mi-lista__list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+.contenido h2 {
+  margin-bottom: 0.5rem;
+  font-size: 1.1rem;
 }
-.mi-lista__list-item {
+
+.meta {
   display: flex;
   align-items: center;
-  gap: 14px;
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  padding: 10px;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  color: var(--color-muted);
+  font-size: 0.8rem;
 }
-.mi-lista__list-poster {
-  width: 44px;
-  height: 66px;
-  border-radius: var(--radius-sm);
-  object-fit: cover;
-  flex-shrink: 0;
+
+.tipo {
+  color: var(--color-cyan);
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-top: 0.9rem;
+  color: var(--color-muted);
+  font-size: 0.8rem;
+}
+
+.campo select,
+.campo textarea {
+  width: 100%;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+}
+
+.campo textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+button {
+  cursor: pointer;
+}
+
+.quitar,
+.contenido button {
+  margin-top: 0.9rem;
+  padding: 0.7rem 1rem;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-2);
+  color: var(--color-text);
+  border-radius: var(--radius-md);
+}
+
+.quitar {
+  background: transparent;
+}
+
+.nota {
+  margin-top: 0.9rem;
+  color: var(--color-muted);
+}
+
+.error,
+.vacio {
+  margin: 0.75rem 0;
+  color: var(--color-muted);
+}
+
+.error {
+  color: #ff9ab4;
+}
+
+.mensaje {
+  margin-top: 0.8rem;
+  color: var(--color-cyan);
 }
 
 @media (max-width: 640px) {
-  .mi-lista__grid {
-    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-    gap: 14px;
+  .item {
+    flex-direction: column;
   }
-  .mi-lista__tabs {
-    overflow-x: auto;
+
+  .poster,
+  .sin-poster {
+    width: 100%;
+    max-width: 140px;
+    height: 180px;
   }
 }
