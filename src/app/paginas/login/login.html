@@ -1,15 +1,126 @@
+
 <main class="login">
-  <h1>StreamList</h1>
+  <section class="login-card">
+    <header class="login-header">
+      <h1>StreamList</h1>
+      <p>Tu próximo maratón comienza aquí.</p>
+    </header>
 
-  @if (auth.usuario(); as usuario) {
-    <p>Hola, {{ usuario.nombre }}</p>
-    <p>{{ usuario.correo }}</p>
-    <button type="button" (click)="auth.cerrarSesion()">Cerrar sesión</button>
-  } @else {
-    <p>Inicia sesión para guardar tu lista de películas y series.</p>
-  }
+    @if (auth.usuario(); as usuario) {
+      <section class="sesion-activa">
+        <h2>¡Bienvenido!</h2>
+        <p>Hola, {{ usuario.nombre }}</p>
+        <p>{{ usuario.correo }}</p>
 
-  <div #botonGoogle [hidden]="auth.haIniciadoSesion()"></div>
+        <button type="button" (click)="auth.cerrarSesion()">
+          Cerrar sesión
+        </button>
+      </section>
+    } @else {
+      <div class="modo-acceso">
+        <button
+          type="button"
+          [class.activo]="modo === 'login'"
+          [attr.aria-pressed]="modo === 'login'"
+          (click)="cambiarModo('login')">
+          Iniciar sesión
+        </button>
 
-  <a routerLink="/buscar">Ir a buscar películas</a>
+        <button
+          type="button"
+          [class.activo]="modo === 'registro'"
+          [attr.aria-pressed]="modo === 'registro'"
+          (click)="cambiarModo('registro')">
+          Crear cuenta
+        </button>
+      </div>
+
+      <h2>{{ modo === 'login' ? 'Bienvenido de nuevo' : 'Únete a StreamList' }}</h2>
+
+      <p class="descripcion">
+        {{
+          modo === 'login'
+            ? 'Inicia sesión para acceder a tu lista personal.'
+            : 'Crea tu cuenta y organiza tus películas y series.'
+        }}
+      </p>
+
+      <form (ngSubmit)="enviarFormulario()" #formulario="ngForm">
+        @if (modo === 'registro') {
+          <label for="nombre">Nombre</label>
+          <input
+            id="nombre"
+            name="nombre"
+            type="text"
+            [(ngModel)]="nombre"
+            placeholder="Tu nombre"
+            autocomplete="given-name"
+            required />
+
+          <label for="apellidos">Apellidos</label>
+          <input
+            id="apellidos"
+            name="apellidos"
+            type="text"
+            [(ngModel)]="apellidos"
+            placeholder="Tus apellidos"
+            autocomplete="family-name"
+            required />
+        }
+
+        <label for="correo">Correo electrónico</label>
+        <input
+          id="correo"
+          name="correo"
+          type="email"
+          [(ngModel)]="correo"
+          placeholder="tu@correo.com"
+          autocomplete="email"
+          required
+          email />
+
+        <label for="contrasena">Contraseña</label>
+        <input
+          id="contrasena"
+          name="contrasena"
+          type="password"
+          [(ngModel)]="contrasena"
+          [attr.autocomplete]="modo === 'login' ? 'current-password' : 'new-password'"
+          placeholder="Mínimo 8 caracteres"
+          minlength="8"
+          required />
+
+        @if (modo === 'registro') {
+          <label for="confirmacion">Confirmar contraseña</label>
+          <input
+            id="confirmacion"
+            name="confirmacion"
+            type="password"
+            [(ngModel)]="confirmacion"
+            placeholder="Repite tu contraseña"
+            autocomplete="new-password"
+            required />
+        }
+
+        @if (mensaje) {
+          <p class="mensaje" role="status">{{ mensaje }}</p>
+        }
+
+        <button
+          class="boton-principal"
+          type="submit"
+          [disabled]="formulario.invalid">
+          {{ modo === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}
+        </button>
+      </form>
+
+      <div class="separador"><span>o continúa con</span></div>
+
+      <div #botonGoogle class="google-container"></div>
+    }
+
+    <a class="enlace-busqueda" routerLink="/buscar">
+      Explorar películas y series
+    </a>
+  </section>
 </main>
