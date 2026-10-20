@@ -102,15 +102,21 @@
             required />
         }
 
-        @if (mensaje) {
-          <p class="mensaje" role="status">{{ mensaje }}</p>
+        @if (mensaje()) {
+          <p class="mensaje" role="status">{{ mensaje() }}</p>
         }
 
         <button
           class="boton-principal"
           type="submit"
-          [disabled]="formulario.invalid">
-          {{ modo === 'login' ? 'Iniciar sesión' : 'Crear cuenta' }}
+          [disabled]="formulario.invalid || cargando()">
+          {{
+            cargando()
+              ? 'Procesando...'
+              : modo === 'login'
+                ? 'Iniciar sesión'
+                : 'Crear cuenta'
+          }}
         </button>
       </form>
 
