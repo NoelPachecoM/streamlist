@@ -6,6 +6,9 @@ import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { ProveedorDePeliculasConCache } from './adaptadores/cache/ProveedorDePeliculasConCache';
 import { AdaptadorGoogle } from './adaptadores/google/AdaptadorGoogle';
+import { ProveedorDeAutenticacionCompuesto } from './adaptadores/ProveedorDeAutenticacionCompuesto';
+import type { ProveedorConEmisores } from './adaptadores/ProveedorDeAutenticacionCompuesto';
+import { AdaptadorSupabaseAuth } from './adaptadores/supabase/AdaptadorSupabaseAuth';
 import { AdaptadorSupabaseCache } from './adaptadores/supabase/AdaptadorSupabaseCache';
 import { AdaptadorSupabaseLista } from './adaptadores/supabase/AdaptadorSupabaseLista';
 import { AdaptadorTMDB } from './adaptadores/tmdb/AdaptadorTMDB';
@@ -46,8 +49,30 @@ function proveedorDePeliculas(): ProveedorDePeliculas {
   ));
 }
 
+/**
+ * Métodos de acceso aceptados:
+ *  - Google (siempre).
+ *  - Cuentas de correo y contraseña en Supabase Auth (si están definidas
+ *    SUPABASE_AUTH_URL y SUPABASE_AUTH_ANON_KEY).
+ */
 export function proveedorDeAutenticacion(): ProveedorDeAutenticacion {
-  return (autenticacion ??= new AdaptadorGoogle(variable('GOOGLE_CLIENT_ID')));
+  if (autenticacion) return autenticacion;
+
+  const proveedores: ProveedorConEmisores[] = [
+    {
+      emisores: ['https://accounts.google.com', 'accounts.google.com'],
+      proveedor: new AdaptadorGoogle(variable('GOOGLE_CLIENT_ID')),
+    },
+  ];
+
+  const urlAuth = process.env['SUPABASE_AUTH_URL'];
+  const claveAuth = process.env['SUPABASE_AUTH_ANON_KEY'];
+  if (urlAuth && claveAuth) {
+    const supabaseAuth = new AdaptadorSupabaseAuth(urlAuth, claveAuth);
+    proveedores.push({ emisores: [supabaseAuth.emisor], proveedor: supabaseAuth });
+  }
+
+  return (autenticacion = new ProveedorDeAutenticacionCompuesto(proveedores));
 }
 
 function repositorioDeLista(): RepositorioDeLista {
