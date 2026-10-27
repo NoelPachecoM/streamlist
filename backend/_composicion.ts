@@ -52,8 +52,9 @@ function proveedorDePeliculas(): ProveedorDePeliculas {
 /**
  * Métodos de acceso aceptados:
  *  - Google (siempre).
- *  - Cuentas de correo y contraseña en Supabase Auth (si están definidas
- *    SUPABASE_AUTH_URL y SUPABASE_AUTH_ANON_KEY).
+ *  - Cuentas de correo y contraseña en Supabase Auth del MISMO proyecto de
+ *    Supabase que guarda la lista (usa SUPABASE_URL y SUPABASE_SERVICE_ROLE_KEY,
+ *    no requiere variables adicionales).
  */
 export function proveedorDeAutenticacion(): ProveedorDeAutenticacion {
   if (autenticacion) return autenticacion;
@@ -65,10 +66,9 @@ export function proveedorDeAutenticacion(): ProveedorDeAutenticacion {
     },
   ];
 
-  const urlAuth = process.env['SUPABASE_AUTH_URL'];
-  const claveAuth = process.env['SUPABASE_AUTH_ANON_KEY'];
-  if (urlAuth && claveAuth) {
-    const supabaseAuth = new AdaptadorSupabaseAuth(urlAuth, claveAuth);
+  const urlSupabase = process.env['SUPABASE_URL'];
+  if (urlSupabase && process.env['SUPABASE_SERVICE_ROLE_KEY']) {
+    const supabaseAuth = new AdaptadorSupabaseAuth(urlSupabase, clienteSupabase());
     proveedores.push({ emisores: [supabaseAuth.emisor], proveedor: supabaseAuth });
   }
 
