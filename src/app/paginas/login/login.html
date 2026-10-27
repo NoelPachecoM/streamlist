@@ -86,7 +86,7 @@
           type="password"
           [(ngModel)]="contrasena"
           [attr.autocomplete]="modo === 'login' ? 'current-password' : 'new-password'"
-          placeholder="Mínimo 8 caracteres"
+          [attr.placeholder]="modo === 'registro' ? 'Mín. 8: mayúscula, minúscula y número' : 'Mínimo 8 caracteres'"
           minlength="8"
           required />
 

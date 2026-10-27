@@ -1,7 +1,7 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
-import { GOOGLE_CLIENT_ID, SUPABASE_AUTH_ANON_KEY, SUPABASE_AUTH_URL } from '../config';
+import { GOOGLE_CLIENT_ID, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../config';
 
 declare const google: any;
 
@@ -28,7 +28,7 @@ type Origen = 'google' | 'supabase';
 const CLAVE_TOKEN = 'streamlist_token';
 
 const SUPABASE_CONFIGURADO =
-  !!SUPABASE_AUTH_URL && !!SUPABASE_AUTH_ANON_KEY && !SUPABASE_AUTH_URL.includes('TU-PROYECTO');
+  !!SUPABASE_URL && !!SUPABASE_PUBLISHABLE_KEY && !SUPABASE_URL.includes('TU-PROYECTO');
 
 const MENSAJE_GENERICO = 'No se pudo completar la operación. Intenta de nuevo.';
 
@@ -40,8 +40,11 @@ function traducirError(mensaje: string): string {
   if (t.includes('rate limit') || t.includes('too many')) {
     return 'Demasiados intentos. Espera un momento e inténtalo de nuevo.';
   }
-  if (t.includes('password') && (t.includes('characters') || t.includes('weak'))) {
-    return 'La contraseña es muy débil. Usa al menos 8 caracteres.';
+  if (t.includes('password should contain') || t.includes('weak_password') || t.includes('weak password')) {
+    return 'La contraseña es muy débil. Usa mayúscula, minúscula y número.';
+  }
+  if (t.includes('password') && t.includes('characters')) {
+    return 'La contraseña es muy corta. Usa al menos 8 caracteres.';
   }
   if (t.includes('email') && t.includes('invalid')) return 'El correo no es válido.';
   if (t.includes('signups not allowed') || t.includes('signup is disabled')) {
@@ -76,10 +79,17 @@ export class AuthService {
   private temporizador?: ReturnType<typeof setTimeout>;
   private googleInicializado = false;
   private origen: Origen | null = null;
+  private resolverListo!: () => void;
+
+  /**
+   * Se cumple cuando ya se restauró la sesión guardada (si la hay). Las páginas que
+   * piden datos del usuario lo esperan para no decidir "no hay sesión" demasiado pronto.
+   */
+  readonly listo: Promise<void> = new Promise<void>((resolver) => (this.resolverListo = resolver));
 
   /** Cliente de Supabase Auth (cuentas de correo y contraseña). Null si no está configurado. */
   private readonly supabase: SupabaseClient | null = SUPABASE_CONFIGURADO
-    ? createClient(SUPABASE_AUTH_URL, SUPABASE_AUTH_ANON_KEY, {
+    ? createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
         auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: false },
       })
     : null;
@@ -108,6 +118,9 @@ export class AuthService {
       localStorage.removeItem(CLAVE_TOKEN);
     }
     this.escucharSupabase();
+    if (!this.supabase) this.resolverListo();
+    // Seguro de vida: nunca dejar a la interfaz esperando indefinidamente.
+    setTimeout(() => this.resolverListo(), 4000);
   }
 
   /** Devuelve el token si sigue vigente; si venció, cierra la sesión (Google) o espera la renovación (Supabase). */
@@ -240,6 +253,8 @@ export class AuthService {
   /** Mantiene sincronizado el token con la sesión de Supabase (inicio, renovación y cierre). */
   private escucharSupabase(): void {
     this.supabase?.auth.onAuthStateChange((evento, sesion) => {
+      // El primer aviso (INITIAL_SESSION) indica que la sesión guardada ya se restauró.
+      this.resolverListo();
       if (sesion) {
         // Si ya hay una sesión de Google restaurada, no la pisa al arrancar.
         if (evento === 'INITIAL_SESSION' && this.origen === 'google') return;

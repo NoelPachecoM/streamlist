@@ -119,6 +119,7 @@ export class Detalle {
 
   /** Si hay sesión, revisa si este título ya está en la lista del usuario. */
   private async cargarItem(id: number, tipo: TipoTitulo): Promise<void> {
+    await this.auth.listo; // espera a que se restaure la sesión guardada
     if (!this.auth.haIniciadoSesion()) return;
     try {
       const items = await firstValueFrom(this.lista.obtener());

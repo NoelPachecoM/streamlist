@@ -73,6 +73,14 @@ export class Login implements AfterViewInit {
 
     if (
       this.modo === 'registro' &&
+      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(this.contrasena)
+    ) {
+      this.mensaje.set('La contraseña debe incluir al menos una mayúscula, una minúscula y un número.');
+      return;
+    }
+
+    if (
+      this.modo === 'registro' &&
       this.contrasena !== this.confirmacion
     ) {
       this.mensaje.set('Las contraseñas no coinciden.');

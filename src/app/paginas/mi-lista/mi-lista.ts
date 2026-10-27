@@ -89,6 +89,7 @@ export class MiLista {
   }
 
   private async cargar(): Promise<void> {
+    await this.auth.listo; // espera a que se restaure la sesión guardada
     if (!this.auth.haIniciadoSesion()) {
       this.cargando.set(false);
       return;
