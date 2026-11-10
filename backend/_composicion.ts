@@ -9,8 +9,10 @@ import { AdaptadorGoogle } from './adaptadores/google/AdaptadorGoogle';
 import { ProveedorDeAutenticacionCompuesto } from './adaptadores/ProveedorDeAutenticacionCompuesto';
 import type { ProveedorConEmisores } from './adaptadores/ProveedorDeAutenticacionCompuesto';
 import { AdaptadorSupabaseAuth } from './adaptadores/supabase/AdaptadorSupabaseAuth';
+import { AdaptadorSupabaseBitacora } from './adaptadores/supabase/AdaptadorSupabaseBitacora';
 import { AdaptadorSupabaseCache } from './adaptadores/supabase/AdaptadorSupabaseCache';
 import { AdaptadorSupabaseLista } from './adaptadores/supabase/AdaptadorSupabaseLista';
+import { AdaptadorSupabaseResenas } from './adaptadores/supabase/AdaptadorSupabaseResenas';
 import { AdaptadorSupabaseUsuarios } from './adaptadores/supabase/AdaptadorSupabaseUsuarios';
 import { AdaptadorTMDB } from './adaptadores/tmdb/AdaptadorTMDB';
 import { ActualizarItemLista } from './dominio/casos-uso/ActualizarItemLista';
@@ -36,6 +38,8 @@ let supabase: SupabaseClient | undefined;
 let peliculas: ProveedorDePeliculas | undefined;
 let lista: RepositorioDeLista | undefined;
 let usuarios: AdaptadorSupabaseUsuarios | undefined;
+let resenas: AdaptadorSupabaseResenas | undefined;
+let bitacora: AdaptadorSupabaseBitacora | undefined;
 let autenticacion: ProveedorDeAutenticacion | undefined;
 
 function clienteSupabase(): SupabaseClient {
@@ -83,6 +87,14 @@ function repositorioDeLista(): RepositorioDeLista {
 
 export function repositorioDeUsuarios(): AdaptadorSupabaseUsuarios {
   return (usuarios ??= new AdaptadorSupabaseUsuarios(clienteSupabase()));
+}
+
+export function repositorioDeResenas(): AdaptadorSupabaseResenas {
+  return (resenas ??= new AdaptadorSupabaseResenas(clienteSupabase()));
+}
+
+export function repositorioDeBitacora(): AdaptadorSupabaseBitacora {
+  return (bitacora ??= new AdaptadorSupabaseBitacora(clienteSupabase()));
 }
 
 export const construirBuscarTitulos = () => new BuscarTitulos(proveedorDePeliculas());
