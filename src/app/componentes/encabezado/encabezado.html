@@ -4,6 +4,9 @@
   <nav class="menu">
     <a routerLink="/buscar" routerLinkActive="activo">Buscar</a>
     <a routerLink="/mi-lista" routerLinkActive="activo">Mi lista</a>
+    @if (auth.esAdministrador()) {
+      <a routerLink="/administracion" routerLinkActive="activo">Administración</a>
+    }
   </nav>
 
   <div class="cuenta">
