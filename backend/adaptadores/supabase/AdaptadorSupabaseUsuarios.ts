@@ -18,27 +18,33 @@ interface FilaUsuario {
   rol_id: RolId;
 }
 
-const TABLA = 'usuarios';
+const TABLA = 'perfiles';
 const CAMPOS = 'id,nombre,correo,rol_id';
 
 export class AdaptadorSupabaseUsuarios {
   constructor(private readonly cliente: SupabaseClient) {}
 
+  /** Devuelve el perfil existente; solo crea la fila si todavía no existe. */
   async guardarPerfil(usuario: UsuarioAutenticado): Promise<UsuarioAplicacion> {
+    const existente = await this.obtenerPorId(usuario.id);
+    if (existente) return existente;
+
     const { data, error } = await this.cliente
       .from(TABLA)
-      .upsert(
-        {
-          id: usuario.id,
-          nombre: usuario.nombre ?? usuario.correo ?? 'Usuario de Google',
-          correo: usuario.correo ?? null,
-        },
-        { onConflict: 'id' },
-      )
+      .insert({
+        id: usuario.id,
+        nombre: usuario.nombre ?? usuario.correo ?? 'Usuario',
+        correo: usuario.correo ?? null,
+      })
       .select(CAMPOS)
       .single();
 
-    if (error) throw new ErrorDeAlmacenamiento();
+    if (error) {
+      // Otra petición pudo crearlo al mismo tiempo.
+      const creado = await this.obtenerPorId(usuario.id);
+      if (creado) return creado;
+      throw new ErrorDeAlmacenamiento();
+    }
     return this.aUsuario(data as FilaUsuario);
   }
 
