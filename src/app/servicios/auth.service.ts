@@ -1,6 +1,8 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Injectable, computed, inject, signal } from '@angular/core';
 import { createClient } from '@supabase/supabase-js';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { firstValueFrom } from 'rxjs';
 import { GOOGLE_CLIENT_ID, SUPABASE_PUBLISHABLE_KEY, SUPABASE_URL } from '../config';
 
 declare const google: any;
@@ -9,6 +11,13 @@ export interface UsuarioSesion {
   nombre: string;
   correo: string;
   foto?: string;
+}
+
+export interface PerfilSesion {
+  id: string;
+  nombre: string;
+  correo: string | null;
+  rolId: 1 | 2;
 }
 
 export interface ResultadoAcceso {
@@ -75,8 +84,11 @@ function estaVigente(token: string): boolean {
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
+  private readonly http = inject(HttpClient);
   private readonly _token = signal<string | null>(null);
+  private readonly _perfil = signal<PerfilSesion | null>(null);
   private temporizador?: ReturnType<typeof setTimeout>;
+  private perfilEnCarga?: Promise<PerfilSesion | null>;
   private googleInicializado = false;
   private origen: Origen | null = null;
   private resolverListo!: () => void;
@@ -109,6 +121,8 @@ export class AuthService {
   });
 
   readonly haIniciadoSesion = computed(() => this.usuario() !== null);
+  readonly perfil = this._perfil.asReadonly();
+  readonly esAdministrador = computed(() => this._perfil()?.rolId === 1);
 
   constructor() {
     const guardado = localStorage.getItem(CLAVE_TOKEN);
@@ -132,6 +146,28 @@ export class AuthService {
       return null;
     }
     return token;
+  }
+
+  /** Carga (una sola vez) el perfil con el rol del usuario. */
+  async cargarPerfil(): Promise<PerfilSesion | null> {
+    await this.listo;
+    const token = this.obtenerToken();
+    if (!token) return null;
+    if (this._perfil()) return this._perfil();
+    if (this.perfilEnCarga) return this.perfilEnCarga;
+
+    const solicitud = firstValueFrom(this.http.get<PerfilSesion>('/api/perfil'))
+      .then((perfil) => {
+        if (!this._token()) return null;
+        this._perfil.set(perfil);
+        return perfil;
+      })
+      .catch(() => null)
+      .finally(() => {
+        if (this.perfilEnCarga === solicitud) this.perfilEnCarga = undefined;
+      });
+    this.perfilEnCarga = solicitud;
+    return solicitud;
   }
 
   /** Crea una cuenta con correo y contraseña. */
@@ -224,6 +260,8 @@ export class AuthService {
     clearTimeout(this.temporizador);
     localStorage.removeItem(CLAVE_TOKEN);
     this._token.set(null);
+    this._perfil.set(null);
+    this.perfilEnCarga = undefined;
     this.origen = null;
     if (eraSupabase) void this.supabase?.auth.signOut();
     if (typeof google !== 'undefined' && google.accounts?.id) {
@@ -237,9 +275,18 @@ export class AuthService {
     if (this.origen === 'supabase') void this.supabase?.auth.signOut({ scope: 'local' });
     localStorage.setItem(CLAVE_TOKEN, token);
     this.activarSesion(token, 'google');
+    void this.cargarPerfil();
   }
 
   private activarSesion(token: string, origen: Origen): void {
+    // El perfil solo se descarta si cambia de usuario (no en cada renovación del token).
+    const usuarioAnterior = this._token() ? decodificar(this._token()!)?.sub : null;
+    const usuarioNuevo = decodificar(token)?.sub;
+    if (usuarioAnterior !== usuarioNuevo) {
+      this._perfil.set(null);
+      this.perfilEnCarga = undefined;
+    }
+
     this._token.set(token);
     this.origen = origen;
     clearTimeout(this.temporizador);
@@ -261,6 +308,8 @@ export class AuthService {
         this.activarSesion(sesion.access_token, 'supabase');
       } else if (this.origen === 'supabase') {
         this._token.set(null);
+        this._perfil.set(null);
+        this.perfilEnCarga = undefined;
         this.origen = null;
       }
     });
