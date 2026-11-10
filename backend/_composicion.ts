@@ -11,6 +11,7 @@ import type { ProveedorConEmisores } from './adaptadores/ProveedorDeAutenticacio
 import { AdaptadorSupabaseAuth } from './adaptadores/supabase/AdaptadorSupabaseAuth';
 import { AdaptadorSupabaseCache } from './adaptadores/supabase/AdaptadorSupabaseCache';
 import { AdaptadorSupabaseLista } from './adaptadores/supabase/AdaptadorSupabaseLista';
+import { AdaptadorSupabaseUsuarios } from './adaptadores/supabase/AdaptadorSupabaseUsuarios';
 import { AdaptadorTMDB } from './adaptadores/tmdb/AdaptadorTMDB';
 import { ActualizarItemLista } from './dominio/casos-uso/ActualizarItemLista';
 import { AgregarALista } from './dominio/casos-uso/AgregarALista';
@@ -34,6 +35,7 @@ function variable(nombre: string): string {
 let supabase: SupabaseClient | undefined;
 let peliculas: ProveedorDePeliculas | undefined;
 let lista: RepositorioDeLista | undefined;
+let usuarios: AdaptadorSupabaseUsuarios | undefined;
 let autenticacion: ProveedorDeAutenticacion | undefined;
 
 function clienteSupabase(): SupabaseClient {
@@ -77,6 +79,10 @@ export function proveedorDeAutenticacion(): ProveedorDeAutenticacion {
 
 function repositorioDeLista(): RepositorioDeLista {
   return (lista ??= new AdaptadorSupabaseLista(clienteSupabase()));
+}
+
+export function repositorioDeUsuarios(): AdaptadorSupabaseUsuarios {
+  return (usuarios ??= new AdaptadorSupabaseUsuarios(clienteSupabase()));
 }
 
 export const construirBuscarTitulos = () => new BuscarTitulos(proveedorDePeliculas());
