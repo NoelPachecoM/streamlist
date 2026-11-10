@@ -2,7 +2,9 @@
   <aside class="admin-sidebar" aria-label="Navegación de administración">
     <div class="admin-brand"><span class="brand-mark" aria-hidden="true"></span> STREAMLIST <span>ADMIN</span></div>
     <p class="sidebar-label">GESTIÓN</p>
-    <span class="side-link selected">Usuarios y roles</span>
+    <button type="button" class="side-link" [class.selected]="seccion() === 'usuarios'" (click)="abrirSeccion('usuarios')">Usuarios y roles</button>
+    <button type="button" class="side-link" [class.selected]="seccion() === 'resenas'" (click)="abrirSeccion('resenas')">Reseñas</button>
+    <button type="button" class="side-link" [class.selected]="seccion() === 'bitacora'" (click)="abrirSeccion('bitacora')">Bitácora</button>
     <div class="sidebar-foot"><span class="online-dot"></span> Datos sincronizados</div>
   </aside>
 
@@ -11,9 +13,9 @@
       <div>
         <p class="eyebrow">CONTROL DE PLATAFORMA</p>
         <h1>Administración</h1>
-        <p class="subtitle">Cuentas y permisos registrados en el servidor.</p>
+        <p class="subtitle">{{ resumen().subtitulo }}</p>
       </div>
-      <span class="account-count">{{ usuarios().length }} CUENTAS</span>
+      <span class="account-count">{{ resumen().conteo }}</span>
     </header>
 
     @if (aviso()) {
@@ -24,43 +26,118 @@
       <output class="error-message" role="alert">{{ error() }}</output>
     }
 
-    <section class="panel" aria-label="Usuarios y roles">
-      <div class="toolbar">
-        <label class="search-field">
-          <span class="sr-only">Buscar por correo o nombre</span>
-          <input type="search" placeholder="Buscar por correo o nombre..." [value]="consulta()" (input)="consulta.set($any($event.target).value)" />
-        </label>
-      </div>
-
-      @if (cargando()) {
-        <output class="loading-message">Cargando cuentas...</output>
-      } @else {
-        <div class="table-scroll">
-          <table>
-            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th></tr></thead>
-            <tbody>
-              @for (usuario of usuariosFiltrados(); track usuario.id) {
-                <tr>
-                  <td class="name-cell">{{ usuario.nombre }}</td>
-                  <td>{{ usuario.correo || 'Sin correo' }}</td>
-                  <td>{{ etiquetaRol(usuario.rolId) }}</td>
-                  <td class="actions">
-                    @if (esMiCuenta(usuario)) {
-                      <span class="self-label">Tu cuenta</span>
-                    } @else {
-                      <button type="button" class="button-outline" [disabled]="guardando() === usuario.id" (click)="cambiarRol(usuario)">
-                        @if (guardando() === usuario.id) { Guardando... } @else { Hacer {{ usuario.rolId === 1 ? 'usuario' : 'administrador' }} }
-                      </button>
-                    }
-                  </td>
-                </tr>
-              } @empty {
-                <tr><td class="empty" colspan="4">No hay usuarios que coincidan con la búsqueda.</td></tr>
-              }
-            </tbody>
-          </table>
+    @if (seccion() === 'usuarios') {
+      <section class="panel" aria-label="Usuarios y roles">
+        <div class="toolbar">
+          <label class="search-field">
+            <span class="sr-only">Buscar por correo o nombre</span>
+            <input type="search" placeholder="Buscar por correo o nombre..." [value]="consulta()" (input)="consulta.set($any($event.target).value)" />
+          </label>
         </div>
-      }
-    </section>
+
+        @if (cargando()) {
+          <output class="loading-message">Cargando cuentas...</output>
+        } @else {
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th></tr></thead>
+              <tbody>
+                @for (usuario of usuariosFiltrados(); track usuario.id) {
+                  <tr>
+                    <td class="name-cell">{{ usuario.nombre }}</td>
+                    <td>{{ usuario.correo || 'Sin correo' }}</td>
+                    <td>{{ etiquetaRol(usuario.rolId) }}</td>
+                    <td class="actions">
+                      @if (esMiCuenta(usuario)) {
+                        <span class="self-label">Tu cuenta</span>
+                      } @else {
+                        <button type="button" class="button-outline" [disabled]="guardando() === usuario.id" (click)="cambiarRol(usuario)">
+                          @if (guardando() === usuario.id) { Guardando... } @else { Hacer {{ usuario.rolId === 1 ? 'usuario' : 'administrador' }} }
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td class="empty" colspan="4">No hay usuarios que coincidan con la búsqueda.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+
+    @if (seccion() === 'resenas') {
+      <section class="panel" aria-label="Reseñas">
+        <div class="toolbar">
+          <label class="search-field">
+            <span class="sr-only">Buscar reseñas</span>
+            <input type="search" placeholder="Buscar por usuario, título o texto..." [value]="consultaResenas()" (input)="consultaResenas.set($any($event.target).value)" />
+          </label>
+        </div>
+
+        @if (cargandoResenas()) {
+          <output class="loading-message">Cargando reseñas...</output>
+        } @else {
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Usuario</th><th>Título</th><th>Calificación</th><th>Reseña</th><th>Fecha</th><th>Acciones</th></tr></thead>
+              <tbody>
+                @for (resena of resenasFiltradas(); track resena.id) {
+                  <tr>
+                    <td class="name-cell">
+                      {{ resena.usuarioNombre }}
+                      @if (resena.usuarioCorreo) {
+                        <span class="sub">{{ resena.usuarioCorreo }}</span>
+                      }
+                    </td>
+                    <td>
+                      {{ resena.titulo }}
+                      <span class="sub">{{ etiquetaTipo(resena.tipo) }}</span>
+                    </td>
+                    <td>{{ resena.calificacion !== null ? resena.calificacion + '/10' : 'Sin calificar' }}</td>
+                    <td class="texto-largo">{{ resena.resena }}</td>
+                    <td>{{ formatearFecha(resena.actualizadoEn) }}</td>
+                    <td class="actions">
+                      <button type="button" class="button-outline" [disabled]="guardando() === resena.id" (click)="eliminarResena(resena)">
+                        @if (guardando() === resena.id) { Eliminando... } @else { Eliminar texto }
+                      </button>
+                    </td>
+                  </tr>
+                } @empty {
+                  <tr><td class="empty" colspan="6">No hay reseñas que coincidan con la búsqueda.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
+
+    @if (seccion() === 'bitacora') {
+      <section class="panel" aria-label="Bitácora">
+        @if (cargandoBitacora()) {
+          <output class="loading-message">Cargando bitácora...</output>
+        } @else {
+          <div class="table-scroll">
+            <table>
+              <thead><tr><th>Fecha</th><th>Administrador</th><th>Acción</th><th>Detalle</th></tr></thead>
+              <tbody>
+                @for (registro of bitacora(); track registro.id) {
+                  <tr>
+                    <td>{{ formatearFecha(registro.creadoEn) }}</td>
+                    <td class="name-cell">{{ registro.adminNombre }}</td>
+                    <td>{{ etiquetaAccion(registro.accion) }}</td>
+                    <td class="texto-largo">{{ describir(registro) }}</td>
+                  </tr>
+                } @empty {
+                  <tr><td class="empty" colspan="4">Todavía no hay acciones registradas.</td></tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    }
   </section>
 </main>
