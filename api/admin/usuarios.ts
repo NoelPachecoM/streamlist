@@ -1,8 +1,8 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { usuarioDeLaPeticion } from '../../backend/_autenticar';
+import { anotarEnBitacora, exigirAdministrador } from '../../backend/_administracion';
 import { repositorioDeUsuarios } from '../../backend/_composicion';
 import { prepararRespuesta, primerValor, responderError } from '../../backend/_http';
-import { ErrorNoAutorizado, ErrorNoEncontrado, ErrorDeValidacion } from '../../backend/dominio/errores';
+import { ErrorNoEncontrado, ErrorDeValidacion } from '../../backend/dominio/errores';
 import type { RolId } from '../../backend/adaptadores/supabase/AdaptadorSupabaseUsuarios';
 
 const METODOS = ['GET', 'PATCH'];
@@ -16,10 +16,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
   }
 
   try {
-    const identidad = await usuarioDeLaPeticion(req);
+    const administrador = await exigirAdministrador(req);
     const repositorio = repositorioDeUsuarios();
-    const administrador = await repositorio.obtenerPorId(identidad.id);
-    if (administrador?.rolId !== 1) throw new ErrorNoAutorizado();
 
     if (req.method === 'GET') {
       res.status(200).json(await repositorio.obtenerTodos());
@@ -28,14 +26,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse): 
 
     const id = primerValor(req.query['id']);
     if (!id) throw new ErrorDeValidacion('Falta el id del usuario');
-    if (id === identidad.id) throw new ErrorDeValidacion('No puedes cambiar tu propio rol');
+    if (id === administrador.id) throw new ErrorDeValidacion('No puedes cambiar tu propio rol');
 
     const cuerpo = comoObjeto(req.body);
     const rolId = cuerpo['rolId'];
     if (rolId !== 1 && rolId !== 2) throw new ErrorDeValidacion('rolId debe ser 1 (administrador) o 2 (usuario)');
 
+    const anterior = await repositorio.obtenerPorId(id);
+    if (!anterior) throw new ErrorNoEncontrado('Usuario no encontrado');
+
     const usuario = await repositorio.cambiarRol(id, rolId as RolId);
     if (!usuario) throw new ErrorNoEncontrado('Usuario no encontrado');
+
+    if (anterior.rolId !== usuario.rolId) {
+      await anotarEnBitacora({
+        adminId: administrador.id,
+        accion: 'rol_cambiado',
+        entidad: 'perfiles',
+        entidadId: usuario.id,
+        detalle: {
+          nombre: usuario.nombre,
+          correo: usuario.correo,
+          rolAnterior: anterior.rolId,
+          rolNuevo: usuario.rolId,
+        },
+      });
+    }
+
     res.status(200).json(usuario);
   } catch (error) {
     responderError(res, error);
