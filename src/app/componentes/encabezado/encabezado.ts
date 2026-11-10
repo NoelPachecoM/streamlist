@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, effect, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../servicios/auth.service';
 
@@ -10,4 +10,11 @@ import { AuthService } from '../../servicios/auth.service';
 })
 export class Encabezado {
   protected readonly auth = inject(AuthService);
+
+  constructor() {
+    // Carga el perfil (con el rol) al iniciar sesión para saber si mostrar el enlace de administración.
+    effect(() => {
+      if (this.auth.haIniciadoSesion()) void this.auth.cargarPerfil();
+    });
+  }
 }
