@@ -11,6 +11,9 @@ export class ErrorDeValidacion extends ErrorDeDominio {
 export class ErrorNoAutenticado extends ErrorDeDominio {
   constructor(mensaje = 'Sesión inválida o expirada') { super(mensaje, 'NO_AUTENTICADO'); }
 }
+export class ErrorNoAutorizado extends ErrorDeDominio {
+  constructor(mensaje = 'No tienes permisos para realizar esta acción') { super(mensaje, 'NO_AUTORIZADO'); }
+}
 export class ErrorNoEncontrado extends ErrorDeDominio {
   constructor(mensaje = 'Recurso no encontrado') { super(mensaje, 'NO_ENCONTRADO'); }
 }
