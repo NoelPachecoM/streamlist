@@ -34,6 +34,7 @@ export class AdaptadorGoogle implements ProveedorDeAutenticacion {
       return {
         id: payload.sub,
         correo: typeof payload.email === 'string' ? payload.email : undefined,
+        nombre: typeof payload.name === 'string' ? payload.name : undefined,
       };
     } catch (error) {
       if (error instanceof ErrorNoAutenticado) throw error;
