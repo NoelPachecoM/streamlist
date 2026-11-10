@@ -1,0 +1,66 @@
+<main class="admin-layout">
+  <aside class="admin-sidebar" aria-label="Navegación de administración">
+    <div class="admin-brand"><span class="brand-mark" aria-hidden="true"></span> STREAMLIST <span>ADMIN</span></div>
+    <p class="sidebar-label">GESTIÓN</p>
+    <span class="side-link selected">Usuarios y roles</span>
+    <div class="sidebar-foot"><span class="online-dot"></span> Datos sincronizados</div>
+  </aside>
+
+  <section class="admin-content">
+    <header class="page-heading">
+      <div>
+        <p class="eyebrow">CONTROL DE PLATAFORMA</p>
+        <h1>Administración</h1>
+        <p class="subtitle">Cuentas y permisos registrados en el servidor.</p>
+      </div>
+      <span class="account-count">{{ usuarios().length }} CUENTAS</span>
+    </header>
+
+    @if (aviso()) {
+      <output class="notice">{{ aviso() }}</output>
+    }
+
+    @if (error()) {
+      <output class="error-message" role="alert">{{ error() }}</output>
+    }
+
+    <section class="panel" aria-label="Usuarios y roles">
+      <div class="toolbar">
+        <label class="search-field">
+          <span class="sr-only">Buscar por correo o nombre</span>
+          <input type="search" placeholder="Buscar por correo o nombre..." [value]="consulta()" (input)="consulta.set($any($event.target).value)" />
+        </label>
+      </div>
+
+      @if (cargando()) {
+        <output class="loading-message">Cargando cuentas...</output>
+      } @else {
+        <div class="table-scroll">
+          <table>
+            <thead><tr><th>Nombre</th><th>Correo</th><th>Rol</th><th>Acciones</th></tr></thead>
+            <tbody>
+              @for (usuario of usuariosFiltrados(); track usuario.id) {
+                <tr>
+                  <td class="name-cell">{{ usuario.nombre }}</td>
+                  <td>{{ usuario.correo || 'Sin correo' }}</td>
+                  <td>{{ etiquetaRol(usuario.rolId) }}</td>
+                  <td class="actions">
+                    @if (esMiCuenta(usuario)) {
+                      <span class="self-label">Tu cuenta</span>
+                    } @else {
+                      <button type="button" class="button-outline" [disabled]="guardando() === usuario.id" (click)="cambiarRol(usuario)">
+                        @if (guardando() === usuario.id) { Guardando... } @else { Hacer {{ usuario.rolId === 1 ? 'usuario' : 'administrador' }} }
+                      </button>
+                    }
+                  </td>
+                </tr>
+              } @empty {
+                <tr><td class="empty" colspan="4">No hay usuarios que coincidan con la búsqueda.</td></tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      }
+    </section>
+  </section>
+</main>
