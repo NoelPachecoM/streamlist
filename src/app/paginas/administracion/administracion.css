@@ -311,5 +311,25 @@ tbody tr:last-child td {
   .toolbar {
     flex-direction: column;
   }
+:where(button.side-link) {
+  background: transparent;
+  border: 0;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
 
+.sub {
+  display: block;
+  font-size: 0.8em;
+  opacity: 0.7;
+}
+
+.texto-largo {
+  white-space: normal;
+  min-width: 220px;
+  max-width: 420px;
+}
 }
