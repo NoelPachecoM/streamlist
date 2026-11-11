@@ -46,3 +46,8 @@ Thumbs.db
 .vercel
 .env*
 .env.local
+
+# Pagina compilada para servirla desde Spring en la red local (npm run build:spring)
+/spring-practica/src/main/resources/static/
+# Claves locales de Spring
+application-local.properties

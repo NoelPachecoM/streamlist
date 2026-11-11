@@ -172,3 +172,46 @@
     font-size: 2rem;
   }
 }
+
+.enlace-secundario {
+  display: block;
+  margin-top: 1.25rem;
+  text-align: center;
+  color: var(--color-cyan);
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.enlace-secundario:hover {
+  text-decoration: underline;
+}
+
+.aviso {
+  color: var(--color-cyan);
+  font-size: 0.9rem;
+}
+
+.acciones-codigo {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.login .enlace-boton {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-cyan);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.login .enlace-boton:hover:not(:disabled) {
+  text-decoration: underline;
+}
+
+.login .enlace-boton:disabled {
+  color: var(--color-muted);
+  cursor: not-allowed;
+}

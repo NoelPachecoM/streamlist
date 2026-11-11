@@ -1,0 +1,103 @@
+<main class="pagina ancha">
+  <header class="fila">
+    <div>
+      <h1>Catálogos</h1>
+      <p class="sub">Altas, bajas y cambios directo en las tablas de Spring.</p>
+    </div>
+    <a class="enlace" routerLink="/spring/cuenta">Mi cuenta</a>
+  </header>
+
+  <section class="tarjeta">
+    <label>
+      Tabla
+      <select [ngModel]="recurso().ruta" (ngModelChange)="elegir($event)">
+        @for (r of recursos; track r.ruta) {
+          <option [value]="r.ruta">{{ r.nombre }}</option>
+        }
+      </select>
+    </label>
+  </section>
+
+  @if (error()) {
+    <p class="error" role="alert">{{ error() }}</p>
+  }
+  @if (mensaje()) {
+    <p class="ok" role="status">{{ mensaje() }}</p>
+  }
+
+  <section class="tarjeta">
+    <h2>{{ editandoId() === null ? 'Nuevo registro' : 'Editando registro ' + editandoId() }}</h2>
+    <form (ngSubmit)="guardar()" class="tarjeta" style="border: 0; padding: 0">
+      <div class="rejilla">
+        @for (c of recurso().campos; track c.clave) {
+          <label>
+            {{ c.etiqueta }}
+            @if (c.tipo === 'largo') {
+              <textarea [name]="c.clave" rows="3" [(ngModel)]="formulario[c.clave]"></textarea>
+            } @else {
+              <input [name]="c.clave" [type]="tipoInput(c)" [(ngModel)]="formulario[c.clave]" />
+            }
+          </label>
+        }
+      </div>
+      <div class="fila">
+        <button class="principal" type="submit" [disabled]="cargando()">
+          {{ editandoId() === null ? 'Crear' : 'Guardar cambios' }}
+        </button>
+        @if (editandoId() !== null) {
+          <button type="button" (click)="limpiarFormulario()">Cancelar edición</button>
+        }
+      </div>
+    </form>
+  </section>
+
+  <section class="tarjeta">
+    <div class="fila">
+      <h2>{{ recurso().nombre }} ({{ pagina()?.totalElements ?? 0 }})</h2>
+      @if (recurso().busqueda) {
+        <input name="busqueda" type="search" placeholder="Buscar por nombre..." [(ngModel)]="busqueda" (keyup.enter)="buscar()" />
+        <button type="button" (click)="buscar()">Buscar</button>
+      }
+    </div>
+
+    @if (cargando() && filas().length === 0) {
+      <p class="sub">Cargando...</p>
+    } @else {
+      <div class="tabla">
+        <table>
+          <thead>
+            <tr>
+              <th>ID</th>
+              @for (c of recurso().campos; track c.clave) {
+                <th>{{ c.etiqueta }}</th>
+              }
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (fila of filas(); track idDe(fila)) {
+              <tr>
+                <td>{{ idDe(fila) }}</td>
+                @for (c of recurso().campos; track c.clave) {
+                  <td>{{ texto(fila, c) }}</td>
+                }
+                <td><div class="fila">
+                  <button type="button" (click)="editar(fila)">Editar</button>
+                  <button type="button" class="peligro" [disabled]="cargando()" (click)="eliminar(fila)">Eliminar</button></div>
+                </td>
+              </tr>
+            } @empty {
+              <tr><td [attr.colspan]="recurso().campos.length + 2">No hay registros.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+
+    <div class="fila">
+      <button type="button" [disabled]="!hayAnterior() || cargando()" (click)="cargar(numeroPagina() - 1)">Anterior</button>
+      <span class="sub">Página {{ numeroPagina() + 1 }} de {{ pagina()?.totalPages || 1 }}</span>
+      <button type="button" [disabled]="!haySiguiente() || cargando()" (click)="cargar(numeroPagina() + 1)">Siguiente</button>
+    </div>
+  </section>
+</main>

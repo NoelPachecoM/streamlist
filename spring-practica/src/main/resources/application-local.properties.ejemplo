@@ -1,0 +1,7 @@
+# Copia este archivo como "application-local.properties" (en esta misma carpeta) y llena tus datos.
+# application-local.properties esta en .gitignore: NUNCA se sube a GitHub.
+
+spring.datasource.password=TU_PASSWORD_DE_POSTGRES_LOCAL
+spring.mail.username=TU_CORREO@gmail.com
+spring.mail.password=TU_CONTRASENA_DE_APLICACION_DE_GMAIL
+tmdb.token=TU_TOKEN_DE_LECTURA_DE_TMDB

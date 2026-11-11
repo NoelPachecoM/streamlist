@@ -1,0 +1,60 @@
+<main class="pagina">
+  <header>
+    <h1>Recuperar contraseña</h1>
+    <p class="sub">Te mandamos un token de 6 dígitos a tu correo (vale 15 minutos).</p>
+  </header>
+
+  <section class="tarjeta">
+    @switch (paso()) {
+      @case (1) {
+        <form (ngSubmit)="solicitar()" class="tarjeta" style="border: 0; padding: 0">
+          <label>
+            Correo registrado
+            <input name="correo" type="email" [(ngModel)]="correo" autocomplete="email" />
+          </label>
+          <label>
+            Nombre (exactamente como lo registraste)
+            <input name="nombre" type="text" [(ngModel)]="nombre" />
+          </label>
+          <button class="principal" type="submit" [disabled]="cargando()">
+            {{ cargando() ? 'Enviando...' : 'Enviar token al correo' }}
+          </button>
+        </form>
+      }
+      @case (2) {
+        <form (ngSubmit)="confirmar()" class="tarjeta" style="border: 0; padding: 0">
+          <label>
+            Token recibido por correo
+            <input name="token" type="text" [(ngModel)]="token" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+          </label>
+          <label>
+            Contraseña nueva
+            <input name="passwordNueva" type="password" [(ngModel)]="passwordNueva" autocomplete="new-password" />
+          </label>
+          <label>
+            Confirmar contraseña nueva
+            <input name="confirmacion" type="password" [(ngModel)]="confirmacion" autocomplete="new-password" />
+          </label>
+          <button class="principal" type="submit" [disabled]="cargando()">
+            {{ cargando() ? 'Guardando...' : 'Cambiar contraseña' }}
+          </button>
+        </form>
+      }
+      @case (3) {
+        <p class="ok">Listo, ya puedes iniciar sesión con tu contraseña nueva.</p>
+        <a class="enlace" routerLink="/login">Ir a iniciar sesión</a>
+      }
+    }
+
+    @if (mensaje()) {
+      <p class="ok" role="status">{{ mensaje() }}</p>
+    }
+    @if (error()) {
+      <p class="error" role="alert">{{ error() }}</p>
+    }
+  </section>
+
+  @if (paso() !== 3) {
+    <a class="enlace" routerLink="/login">Volver</a>
+  }
+</main>

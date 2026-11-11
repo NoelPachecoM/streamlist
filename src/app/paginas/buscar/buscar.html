@@ -1,50 +1,159 @@
-
-
 <main class="buscar">
-  <form class="formulario" (submit)="$event.preventDefault(); buscar(caja.value)">
-    <input #caja type="search" placeholder="Busca una película o serie..." autocomplete="off" />
-    <button type="submit">Buscar</button>
-  </form>
+  <!-- Portada con buscador -->
+  <section class="portada" [class.compacta]="termino()">
+    @if (!termino() && destacado(); as d) {
+      <div class="fondo" [style.background-image]="'url(' + d.imagenFondo + ')'"></div>
+    }
+    <div class="portada-contenido">
+      @if (!termino()) {
+        <p class="etiqueta">PELÍCULAS Y SERIES</p>
+        <h1>Encuentra qué ver <span class="degradado">esta noche</span></h1>
+        <p class="sub">Busca cualquier título, guárdalo en tu lista y comparte tu reseña.</p>
+      }
+      <form class="formulario" (submit)="$event.preventDefault(); buscar(caja.value)">
+        <span class="lupa" aria-hidden="true">⌕</span>
+        <input #caja type="search" placeholder="Busca una película o serie..." autocomplete="off" [value]="termino()" aria-label="Buscar" />
+        @if (termino()) {
+          <button type="button" class="limpiar" (click)="limpiar(caja)" aria-label="Limpiar búsqueda">✕</button>
+        }
+        <button type="submit" class="ir">Buscar</button>
+      </form>
+    </div>
+  </section>
 
-  @if (error(); as mensaje) {
-    <p class="error">{{ mensaje }}</p>
-  }
+  @if (termino()) {
+    <!-- ===== Resultados de búsqueda ===== -->
+    <section class="bloque">
+      <header class="titulo-bloque">
+        <h2>Resultados para «{{ termino() }}»</h2>
+        @if (buscado() && totalResultados() > 0) {
+          <span class="contador">{{ totalResultados() }} títulos</span>
+        }
+      </header>
 
-  @if (buscado() && !cargando() && !error() && resultados().length === 0) {
-    <p class="vacio">No encontramos resultados para "{{ termino() }}".</p>
-  }
+      @if (error(); as mensaje) {
+        <p class="error">{{ mensaje }}</p>
+      }
 
-    <section class="grid">
-    @for (titulo of resultados(); track titulo.tipo + titulo.tmdbId) {
-      <a class="enlace-tarjeta" [routerLink]="['/titulo', titulo.tipo, titulo.tmdbId]">
-        <article class="tarjeta">
-          @if (titulo.imagenPoster) {
-            <img [src]="titulo.imagenPoster" [alt]="'Póster de ' + titulo.nombre" loading="lazy" />
-          } @else {
-            <div class="sin-poster">Sin imagen</div>
-          }
-          <div class="info">
-            <h2>{{ titulo.nombre }}</h2>
+      @if (buscado() && !cargando() && !error() && resultados().length === 0) {
+        <div class="vacio">
+          <p class="vacio-icono" aria-hidden="true">🎬</p>
+          <p>No encontramos resultados para «{{ termino() }}». Prueba con otro nombre.</p>
+        </div>
+      }
+
+      <div class="grid">
+        @for (titulo of resultados(); track titulo.tipo + titulo.tmdbId; let i = $index) {
+          <a class="tarjeta" [routerLink]="['/titulo', titulo.tipo, titulo.tmdbId]" [style.animation-delay]="retraso(i)">
+            <div class="poster-caja">
+              @if (titulo.imagenPoster) {
+                <img [src]="titulo.imagenPoster" [alt]="'Póster de ' + titulo.nombre" loading="lazy" />
+              } @else {
+                <div class="sin-poster">Sin imagen</div>
+              }
+              @if (titulo.calificacion) {
+                <span class="nota">★ {{ titulo.calificacion.toFixed(1) }}</span>
+              }
+              <span class="ver">Ver detalle</span>
+            </div>
+            <h3>{{ titulo.nombre }}</h3>
             <p class="meta">
               <span class="tipo">{{ titulo.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
               @if (titulo.anio) {
                 <span>{{ titulo.anio }}</span>
               }
+            </p>
+          </a>
+        }
+        @if (cargando()) {
+          @for (n of esqueletos; track n) {
+            <div class="tarjeta-esqueleto">
+              <div class="esqueleto poster-esqueleto"></div>
+              <div class="esqueleto linea"></div>
+              <div class="esqueleto linea corta"></div>
+            </div>
+          }
+        }
+      </div>
+
+      @if (hayMas() && !cargando()) {
+        <div class="centro">
+          <button type="button" class="mas" (click)="cargarMas()">Cargar más</button>
+        </div>
+      }
+    </section>
+  } @else {
+    <!-- ===== Pantalla de inicio ===== -->
+    @if (errorInicio(); as mensaje) {
+      <p class="error">{{ mensaje }}</p>
+    }
+
+    <section class="bloque">
+      <header class="titulo-bloque">
+        <h2>Top 10 en el mundo <span class="sub-titulo">esta semana</span></h2>
+      </header>
+      <div class="carrusel">
+        @if (cargandoInicio()) {
+          @for (n of esqueletos; track n) {
+            <div class="top-item">
+              <span class="numero esqueleto-numero">{{ n + 1 }}</span>
+              <div class="esqueleto top-poster"></div>
+            </div>
+          }
+        }
+        @for (titulo of top10(); track titulo.tipo + titulo.tmdbId; let i = $index) {
+          <a class="top-item aparece" [routerLink]="['/titulo', titulo.tipo, titulo.tmdbId]" [style.animation-delay]="retraso(i)" [attr.aria-label]="(i + 1) + '. ' + titulo.nombre">
+            <span class="numero" aria-hidden="true">{{ i + 1 }}</span>
+            <div class="top-poster poster-caja">
+              @if (titulo.imagenPoster) {
+                <img [src]="titulo.imagenPoster" [alt]="'Póster de ' + titulo.nombre" loading="lazy" />
+              } @else {
+                <div class="sin-poster">{{ titulo.nombre }}</div>
+              }
+              <span class="ver">{{ titulo.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+            </div>
+          </a>
+        }
+      </div>
+    </section>
+
+    <section class="bloque">
+      <header class="titulo-bloque">
+        <h2>Tendencias de hoy</h2>
+      </header>
+      <div class="grid">
+        @if (cargandoInicio()) {
+          @for (n of esqueletos; track n) {
+            <div class="tarjeta-esqueleto">
+              <div class="esqueleto poster-esqueleto"></div>
+              <div class="esqueleto linea"></div>
+              <div class="esqueleto linea corta"></div>
+            </div>
+          }
+        }
+        @for (titulo of hoy(); track titulo.tipo + titulo.tmdbId; let i = $index) {
+          <a class="tarjeta" [routerLink]="['/titulo', titulo.tipo, titulo.tmdbId]" [style.animation-delay]="retraso(i)">
+            <div class="poster-caja">
+              @if (titulo.imagenPoster) {
+                <img [src]="titulo.imagenPoster" [alt]="'Póster de ' + titulo.nombre" loading="lazy" />
+              } @else {
+                <div class="sin-poster">Sin imagen</div>
+              }
               @if (titulo.calificacion) {
-                <span>★ {{ titulo.calificacion.toFixed(1) }}</span>
+                <span class="nota">★ {{ titulo.calificacion.toFixed(1) }}</span>
+              }
+              <span class="ver">Ver detalle</span>
+            </div>
+            <h3>{{ titulo.nombre }}</h3>
+            <p class="meta">
+              <span class="tipo">{{ titulo.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+              @if (titulo.anio) {
+                <span>{{ titulo.anio }}</span>
               }
             </p>
-          </div>
-        </article>
-      </a>
-    }
-  </section>
-
-  @if (cargando()) {
-    <p class="cargando">Cargando...</p>
-  }
-
-  @if (hayMas() && !cargando()) {
-    <button type="button" class="mas" (click)="cargarMas()">Cargar más</button>
+          </a>
+        }
+      </div>
+    </section>
   }
 </main>

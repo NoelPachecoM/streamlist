@@ -41,3 +41,9 @@ export interface DetalleTitulo extends ResultadoBusqueda {
   reparto: MiembroReparto[];
   disponibilidad: DisponibilidadStreaming;
 }
+
+/** Lo más visto en el mundo (GET /api/tmdb/tendencias). */
+export interface Tendencias {
+  periodo: 'semana' | 'dia';
+  resultados: ResultadoBusqueda[];
+}

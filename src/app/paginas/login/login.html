@@ -1,4 +1,3 @@
-
 <main class="login">
   <section class="login-card">
     <header class="login-header">
@@ -17,112 +16,151 @@
         </button>
       </section>
     } @else {
-      <div class="modo-acceso">
-        <button
-          type="button"
-          [class.activo]="modo === 'login'"
-          [attr.aria-pressed]="modo === 'login'"
-          (click)="cambiarModo('login')">
-          Iniciar sesión
-        </button>
+      @if (esperandoCodigo()) {
+        <h2>Verifica tu correo</h2>
+        <p class="descripcion">
+          Escribe el código de 6 dígitos que enviamos a <strong>{{ correo }}</strong>.
+          Así comprobamos que el correo existe.
+        </p>
 
-        <button
-          type="button"
-          [class.activo]="modo === 'registro'"
-          [attr.aria-pressed]="modo === 'registro'"
-          (click)="cambiarModo('registro')">
-          Crear cuenta
-        </button>
-      </div>
-
-      <h2>{{ modo === 'login' ? 'Bienvenido de nuevo' : 'Únete a StreamList' }}</h2>
-
-      <p class="descripcion">
-        {{
-          modo === 'login'
-            ? 'Inicia sesión para acceder a tu lista personal.'
-            : 'Crea tu cuenta y organiza tus películas y series.'
-        }}
-      </p>
-
-      <form (ngSubmit)="enviarFormulario()" #formulario="ngForm">
-        @if (modo === 'registro') {
-          <label for="nombre">Nombre</label>
+        <form (ngSubmit)="confirmarCodigo()">
+          <label for="codigo">Código de verificación</label>
           <input
-            id="nombre"
-            name="nombre"
+            id="codigo"
+            name="codigo"
             type="text"
-            [(ngModel)]="nombre"
-            placeholder="Tu nombre"
-            autocomplete="given-name"
+            [(ngModel)]="codigo"
+            inputmode="numeric"
+            maxlength="6"
+            placeholder="123456"
+            autocomplete="one-time-code"
             required />
 
-          <label for="apellidos">Apellidos</label>
-          <input
-            id="apellidos"
-            name="apellidos"
-            type="text"
-            [(ngModel)]="apellidos"
-            placeholder="Tus apellidos"
-            autocomplete="family-name"
-            required />
-        }
+          @if (aviso()) {
+            <p class="aviso" role="status">{{ aviso() }}</p>
+          }
+          @if (mensaje()) {
+            <p class="mensaje" role="alert">{{ mensaje() }}</p>
+          }
 
-        <label for="correo">Correo electrónico</label>
-        <input
-          id="correo"
-          name="correo"
-          type="email"
-          [(ngModel)]="correo"
-          placeholder="tu@correo.com"
-          autocomplete="email"
-          required
-          email />
+          <button class="boton-principal" type="submit" [disabled]="cargando() || codigo.length !== 6">
+            {{ cargando() ? 'Verificando...' : 'Verificar y crear cuenta' }}
+          </button>
+        </form>
 
-        <label for="contrasena">Contraseña</label>
-        <input
-          id="contrasena"
-          name="contrasena"
-          type="password"
-          [(ngModel)]="contrasena"
-          [attr.autocomplete]="modo === 'login' ? 'current-password' : 'new-password'"
-          [attr.placeholder]="modo === 'registro' ? 'Mín. 8: mayúscula, minúscula y número' : 'Mínimo 8 caracteres'"
-          minlength="8"
-          required />
+        <div class="acciones-codigo">
+          <button type="button" class="enlace-boton" (click)="reenviarCodigo()" [disabled]="cargando() || segundosEspera() > 0">
+            {{ segundosEspera() > 0 ? 'Reenviar código (' + segundosEspera() + ' s)' : 'Reenviar código' }}
+          </button>
+          <button type="button" class="enlace-boton" (click)="corregirDatos()">Cambiar mis datos</button>
+        </div>
+      } @else {
+        <div class="modo-acceso">
+          <button
+            type="button"
+            [class.activo]="modo === 'login'"
+            [attr.aria-pressed]="modo === 'login'"
+            (click)="cambiarModo('login')">
+            Iniciar sesión
+          </button>
 
-        @if (modo === 'registro') {
-          <label for="confirmacion">Confirmar contraseña</label>
-          <input
-            id="confirmacion"
-            name="confirmacion"
-            type="password"
-            [(ngModel)]="confirmacion"
-            placeholder="Repite tu contraseña"
-            autocomplete="new-password"
-            required />
-        }
+          <button
+            type="button"
+            [class.activo]="modo === 'registro'"
+            [attr.aria-pressed]="modo === 'registro'"
+            (click)="cambiarModo('registro')">
+            Crear cuenta
+          </button>
+        </div>
 
-        @if (mensaje()) {
-          <p class="mensaje" role="status">{{ mensaje() }}</p>
-        }
+        <h2>{{ modo === 'login' ? 'Bienvenido de nuevo' : 'Únete a StreamList' }}</h2>
 
-        <button
-          class="boton-principal"
-          type="submit"
-          [disabled]="formulario.invalid || cargando()">
+        <p class="descripcion">
           {{
-            cargando()
-              ? 'Procesando...'
-              : modo === 'login'
-                ? 'Iniciar sesión'
-                : 'Crear cuenta'
+            modo === 'login'
+              ? 'Inicia sesión para acceder a tu lista personal.'
+              : 'Crea tu cuenta y organiza tus películas y series.'
           }}
-        </button>
-      </form>
+        </p>
 
-      <div class="separador"><span>o continúa con</span></div>
+        <form (ngSubmit)="enviarFormulario()" #formulario="ngForm">
+          @if (modo === 'registro') {
+            <label for="nombre">Nombre</label>
+            <input
+              id="nombre"
+              name="nombre"
+              type="text"
+              [(ngModel)]="nombre"
+              placeholder="Tu nombre"
+              maxlength="100"
+              autocomplete="name"
+              required />
 
-      <div #botonGoogle class="google-container"></div>
+            <label for="telefono">Teléfono (opcional)</label>
+            <input
+              id="telefono"
+              name="telefono"
+              type="tel"
+              [(ngModel)]="telefono"
+              placeholder="10 dígitos"
+              maxlength="20"
+              autocomplete="tel" />
+          }
+
+          <label for="correo">Correo electrónico</label>
+          <input
+            id="correo"
+            name="correo"
+            type="email"
+            [(ngModel)]="correo"
+            placeholder="tu@correo.com"
+            autocomplete="email"
+            required />
+
+          <label for="contrasena">Contraseña</label>
+          <input
+            id="contrasena"
+            name="contrasena"
+            type="password"
+            [(ngModel)]="contrasena"
+            [attr.autocomplete]="modo === 'login' ? 'current-password' : 'new-password'"
+            [attr.placeholder]="modo === 'registro' ? 'Mínimo 8 caracteres' : 'Tu contraseña'"
+            required />
+
+          @if (modo === 'registro') {
+            <label for="confirmacion">Confirmar contraseña</label>
+            <input
+              id="confirmacion"
+              name="confirmacion"
+              type="password"
+              [(ngModel)]="confirmacion"
+              placeholder="Repite tu contraseña"
+              autocomplete="new-password"
+              required />
+          }
+
+          @if (mensaje()) {
+            <p class="mensaje" role="alert">{{ mensaje() }}</p>
+          }
+
+          <button
+            class="boton-principal"
+            type="submit"
+            [disabled]="formulario.invalid || cargando()">
+            {{
+              cargando()
+                ? 'Procesando...'
+                : modo === 'login'
+                  ? 'Iniciar sesión'
+                  : 'Crear cuenta'
+            }}
+          </button>
+        </form>
+      }
+
+      @if (modo === 'login' && !esperandoCodigo()) {
+        <a class="enlace-secundario" routerLink="/spring/recuperar">¿Olvidaste tu contraseña?</a>
+      }
     }
 
     <a class="enlace-busqueda" routerLink="/buscar">

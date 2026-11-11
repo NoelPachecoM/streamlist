@@ -1,5 +1,5 @@
-import { Component, effect, inject } from '@angular/core';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthService } from '../../servicios/auth.service';
 
 @Component({
@@ -10,11 +10,22 @@ import { AuthService } from '../../servicios/auth.service';
 })
 export class Encabezado {
   protected readonly auth = inject(AuthService);
+  private readonly router = inject(Router);
 
-  constructor() {
-    // Carga el perfil (con el rol) al iniciar sesión para saber si mostrar el enlace de administración.
-    effect(() => {
-      if (this.auth.haIniciadoSesion()) void this.auth.cargarPerfil();
-    });
+  /** Menú del celular (en computadora siempre se ve). */
+  protected readonly menuAbierto = signal(false);
+
+  protected inicial(nombre: string): string {
+    return (nombre.trim()[0] ?? '?').toUpperCase();
+  }
+
+  protected cerrarMenu(): void {
+    this.menuAbierto.set(false);
+  }
+
+  protected cerrarSesion(): void {
+    this.cerrarMenu();
+    this.auth.cerrarSesion();
+    void this.router.navigate(['/buscar']);
   }
 }

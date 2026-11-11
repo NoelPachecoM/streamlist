@@ -56,6 +56,7 @@
 
 .side-link {
   display: block;
+  font: inherit;
   width: 100%;
   padding: 0.58rem 0.65rem;
   border: 1px solid transparent;
@@ -311,25 +312,24 @@ tbody tr:last-child td {
   .toolbar {
     flex-direction: column;
   }
-:where(button.side-link) {
-  background: transparent;
-  border: 0;
-  width: 100%;
-  text-align: left;
-  font: inherit;
-  color: inherit;
-  cursor: pointer;
+
 }
 
-.sub {
-  display: block;
-  font-size: 0.8em;
-  opacity: 0.7;
+/* Reseñas y bitácora */
+.muted {
+  margin-left: 0.25rem;
+  color: #9c9aa9;
+  font-weight: 400;
 }
 
-.texto-largo {
-  white-space: normal;
+td.texto {
   min-width: 220px;
   max-width: 420px;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
+
+.notice,
+.error-message {
+  display: block;
 }

@@ -1,0 +1,6 @@
+build/
+bin/
+.gradle/
+.vscode/
+src/main/resources/application-local.properties
+src/main/resources/static/

@@ -1,0 +1,178 @@
+<main class="cuenta">
+  <header class="encabezado">
+    <div class="perfil">
+      <span class="avatar" aria-hidden="true">{{ inicial() }}</span>
+      <div>
+        <p class="etiqueta">MI CUENTA</p>
+        <h1>{{ datos()?.nombre ?? api.usuario()?.nombre }}</h1>
+        <p class="sub">Tus datos personales y la configuración de tu cuenta.</p>
+      </div>
+    </div>
+    <button type="button" class="salir" (click)="salir()">Cerrar sesión</button>
+  </header>
+
+  <div class="columnas">
+    <!-- Datos actuales -->
+    <section class="tarjeta mis-datos">
+      <h2>Mis datos</h2>
+      @if (datos(); as d) {
+        <dl>
+          <div class="dato"><dt>Nombre</dt><dd>{{ d.nombre }}</dd></div>
+          <div class="dato"><dt>Correo</dt><dd>{{ d.correo }}</dd></div>
+          <div class="dato"><dt>Teléfono</dt><dd>{{ d.telefono || 'Sin teléfono' }}</dd></div>
+          <div class="dato">
+            <dt>Suscripción</dt>
+            <dd><span class="insignia" [class.cancelada]="d.suscripcion === 'cancelada'">{{ d.suscripcion }}</span></dd>
+          </div>
+        </dl>
+      } @else {
+        <div class="esqueleto renglon"></div>
+        <div class="esqueleto renglon"></div>
+        <div class="esqueleto renglon"></div>
+      }
+    </section>
+
+    <!-- Opciones (menús desplegables) -->
+    <section class="ajustes">
+      <h2>Editar mi cuenta</h2>
+      <p class="sub">Abre solo lo que quieras cambiar. Te pediremos tu contraseña actual para confirmar que eres tú.</p>
+
+      <details class="opcion" name="ajustes">
+        <summary>
+          <span class="icono" aria-hidden="true">✎</span>
+          <span class="texto"><strong>Cambiar nombre</strong><small>Cómo te ven los demás en las reseñas</small></span>
+          <span class="flecha" aria-hidden="true">›</span>
+        </summary>
+        <div class="contenido">
+          <label>Nombre nuevo
+            <input name="nombreNuevo" type="text" [(ngModel)]="nombreNuevo" maxlength="100" autocomplete="name" />
+          </label>
+          <label>Contraseña actual
+            <input name="passwordNombre" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+          </label>
+          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarNombre()">Guardar nombre</button>
+        </div>
+      </details>
+
+      <details class="opcion" name="ajustes">
+        <summary>
+          <span class="icono" aria-hidden="true">☎</span>
+          <span class="texto"><strong>Cambiar teléfono</strong><small>{{ datos()?.telefono || 'Sin teléfono registrado' }}</small></span>
+          <span class="flecha" aria-hidden="true">›</span>
+        </summary>
+        <div class="contenido">
+          <label>Teléfono nuevo
+            <input name="telefonoNuevo" type="tel" [(ngModel)]="telefonoNuevo" maxlength="20" autocomplete="tel" />
+          </label>
+          <label>Contraseña actual
+            <input name="passwordTelefono" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+          </label>
+          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarTelefono()">Guardar teléfono</button>
+        </div>
+      </details>
+
+      <details class="opcion" name="ajustes" [open]="pasoCorreo() !== 'inicio'">
+        <summary>
+          <span class="icono" aria-hidden="true">✉</span>
+          <span class="texto"><strong>Cambiar correo</strong><small>Se confirma con un código en cada correo</small></span>
+          <span class="flecha" aria-hidden="true">›</span>
+        </summary>
+        <div class="contenido">
+          <ol class="pasos">
+            <li [class.actual]="pasoCorreo() === 'inicio'">Correo nuevo</li>
+            <li [class.actual]="pasoCorreo() === 'actual'">Código del correo actual</li>
+            <li [class.actual]="pasoCorreo() === 'nuevo'">Código del correo nuevo</li>
+          </ol>
+          @switch (pasoCorreo()) {
+            @case ('inicio') {
+              <label>Correo nuevo
+                <input name="correoNuevo" type="email" [(ngModel)]="correoNuevo" autocomplete="email" />
+              </label>
+              <label>Contraseña actual
+                <input name="passwordCorreo" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+              </label>
+              <button type="button" class="principal" [disabled]="cargando()" (click)="pedirCambioCorreo()">Enviar código</button>
+            }
+            @case ('actual') {
+              <p class="sub">Escribe el código que enviamos a tu correo actual (<strong>{{ api.usuario()?.correo }}</strong>).</p>
+              <label>Código de 6 dígitos
+                <input name="codigoCorreoActual" type="text" [(ngModel)]="codigoCorreo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+              </label>
+              <div class="fila">
+                <button type="button" class="principal" [disabled]="cargando()" (click)="confirmarCorreoActual()">Confirmar</button>
+                <button type="button" class="secundario" [disabled]="cargando()" (click)="cancelarCambioCorreo()">Cancelar</button>
+              </div>
+            }
+            @case ('nuevo') {
+              <p class="sub">Escribe el código que enviamos a tu correo nuevo (<strong>{{ correoPendiente() }}</strong>).</p>
+              <label>Código de 6 dígitos
+                <input name="codigoCorreoNuevo" type="text" [(ngModel)]="codigoCorreo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+              </label>
+              <div class="fila">
+                <button type="button" class="principal" [disabled]="cargando()" (click)="confirmarCorreoNuevo()">Cambiar correo</button>
+                <button type="button" class="secundario" [disabled]="cargando()" (click)="cancelarCambioCorreo()">Cancelar</button>
+              </div>
+            }
+          }
+        </div>
+      </details>
+
+      <details class="opcion" name="ajustes">
+        <summary>
+          <span class="icono" aria-hidden="true">🔒</span>
+          <span class="texto"><strong>Cambiar contraseña</strong><small>Usa al menos 8 caracteres</small></span>
+          <span class="flecha" aria-hidden="true">›</span>
+        </summary>
+        <div class="contenido">
+          <label>Contraseña actual
+            <input name="passwordActualCambio" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+          </label>
+          <label>Contraseña nueva
+            <input name="passwordNueva" type="password" [(ngModel)]="passwordNueva" autocomplete="new-password" />
+          </label>
+          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarPassword()">Guardar contraseña</button>
+        </div>
+      </details>
+
+      <details class="opcion peligro" name="ajustes" [open]="solicitudCancelacion() !== null">
+        <summary>
+          <span class="icono" aria-hidden="true">⚠</span>
+          <span class="texto"><strong>Cancelar suscripción</strong><small>Te mandamos un código al correo (vale 10 minutos)</small></span>
+          <span class="flecha" aria-hidden="true">›</span>
+        </summary>
+        <div class="contenido">
+          @if (solicitudCancelacion() === null) {
+            <label>Contraseña actual
+              <input name="passwordCancelar" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+            </label>
+            <button type="button" class="peligro-boton" [disabled]="cargando()" (click)="pedirCodigoCancelacion()">Pedir código de cancelación</button>
+          } @else {
+            <label>Código de 6 dígitos
+              <input name="codigoCancelacion" type="text" [(ngModel)]="codigoCancelacion" inputmode="numeric" maxlength="6" />
+            </label>
+            <button type="button" class="peligro-boton" [disabled]="cargando()" (click)="confirmarCancelacion()">Confirmar cancelación</button>
+          }
+        </div>
+      </details>
+    </section>
+  </div>
+
+  <!-- Avisos flotantes -->
+  <div class="avisos" aria-live="polite">
+    @if (cargando()) {
+      <p class="aviso info">Procesando...</p>
+    }
+    @if (mensaje()) {
+      <p class="aviso ok" role="status">
+        {{ mensaje() }}
+        <button type="button" (click)="mensaje.set('')" aria-label="Cerrar aviso">✕</button>
+      </p>
+    }
+    @if (error()) {
+      <p class="aviso error" role="alert">
+        {{ error() }}
+        <button type="button" (click)="error.set('')" aria-label="Cerrar aviso">✕</button>
+      </p>
+    }
+  </div>
+</main>

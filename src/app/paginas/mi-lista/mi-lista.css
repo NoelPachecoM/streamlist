@@ -167,3 +167,58 @@ button {
     height: 180px;
   }
 }
+/* ---------------- Animaciones y celular ---------------- */
+
+.item {
+  animation: aparecer 0.35s ease both;
+  transition: border-color var(--transition-normal), transform var(--transition-normal), box-shadow var(--transition-normal);
+}
+
+.item:hover {
+  border-color: var(--color-surface-3);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35);
+}
+
+.item .poster {
+  transition: transform var(--transition-normal);
+}
+
+.item a:hover .poster {
+  transform: scale(1.03);
+}
+
+.contenido h2 a {
+  transition: color var(--transition-normal);
+}
+
+.contenido h2 a:hover {
+  color: var(--color-cyan);
+}
+
+.pestanas button:not(.activa):hover {
+  border-color: var(--color-surface-3);
+  color: var(--color-text);
+}
+
+.mensaje {
+  animation: aparecer 0.3s ease both;
+}
+
+@media (max-width: 560px) {
+  .pestanas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.4rem;
+  }
+
+  .pestanas button {
+    padding: 0.6rem 0.4rem;
+    font-size: 0.85rem;
+  }
+
+  .item {
+    padding: 0.8rem;
+    gap: 0.8rem;
+  }
+
+}

@@ -1,20 +1,37 @@
-<header class="barra">
-  <a routerLink="/buscar" class="logo">StreamList</a>
+<header class="barra" [class.abierto]="menuAbierto()">
+  <a routerLink="/buscar" class="logo" (click)="cerrarMenu()">StreamList</a>
 
-  <nav class="menu">
-    <a routerLink="/buscar" routerLinkActive="activo">Buscar</a>
-    <a routerLink="/mi-lista" routerLinkActive="activo">Mi lista</a>
-    @if (auth.esAdministrador()) {
-      <a routerLink="/administracion" routerLinkActive="activo">Administración</a>
-    }
-  </nav>
+  <button
+    type="button"
+    class="hamburguesa"
+    [attr.aria-expanded]="menuAbierto()"
+    aria-controls="menu-principal"
+    aria-label="Abrir menú"
+    (click)="menuAbierto.set(!menuAbierto())"
+  >
+    <span></span><span></span><span></span>
+  </button>
 
-  <div class="cuenta">
-    @if (auth.usuario(); as usuario) {
-      <span>{{ usuario.nombre }}</span>
-      <button type="button" (click)="auth.cerrarSesion()">Cerrar sesión</button>
-    } @else {
-      <a routerLink="/login">Iniciar sesión</a>
-    }
+  <div class="desplegable" id="menu-principal">
+    <nav class="menu">
+      <a routerLink="/buscar" routerLinkActive="activo" (click)="cerrarMenu()">Buscar</a>
+      <a routerLink="/mi-lista" routerLinkActive="activo" (click)="cerrarMenu()">Mi lista</a>
+      @if (auth.haIniciadoSesion()) {
+        <a routerLink="/spring/cuenta" routerLinkActive="activo" (click)="cerrarMenu()">Mi cuenta</a>
+      }
+      @if (auth.esAdministrador()) {
+        <a routerLink="/administracion" routerLinkActive="activo" (click)="cerrarMenu()">Administración</a>
+      }
+    </nav>
+
+    <div class="cuenta">
+      @if (auth.usuario(); as usuario) {
+        <span class="avatar" aria-hidden="true">{{ inicial(usuario.nombre) }}</span>
+        <span class="nombre">{{ usuario.nombre }}</span>
+        <button type="button" (click)="cerrarSesion()">Cerrar sesión</button>
+      } @else {
+        <a routerLink="/login" class="entrar" (click)="cerrarMenu()">Iniciar sesión</a>
+      }
+    </div>
   </div>
 </header>

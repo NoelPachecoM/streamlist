@@ -33,11 +33,10 @@
 
     <section class="items">
       @for (item of itemsVisibles(); track item.id) {
-        @let d = detalles()[clave(item)];
         <article class="item">
-          @if (d && d.imagenPoster) {
+          @if (item.imagenPoster) {
             <a [routerLink]="['/titulo', item.tipo, item.tmdbId]">
-              <img class="poster" [src]="d.imagenPoster" [alt]="'Póster de ' + d.nombre" loading="lazy" />
+              <img class="poster" [src]="item.imagenPoster" [alt]="'Póster de ' + item.nombre" loading="lazy" />
             </a>
           } @else {
             <div class="sin-poster">Sin imagen</div>
@@ -45,21 +44,15 @@
 
           <div class="contenido">
             <h2>
-              @if (d) {
-                <a [routerLink]="['/titulo', item.tipo, item.tmdbId]">{{ d.nombre }}</a>
-              } @else {
-                Título #{{ item.tmdbId }}
-              }
+              <a [routerLink]="['/titulo', item.tipo, item.tmdbId]">{{ item.nombre }}</a>
             </h2>
 
-            @if (d) {
-              <p class="meta">
-                <span class="tipo">{{ item.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
-                @if (d.anio) {
-                  <span>{{ d.anio }}</span>
-                }
-              </p>
-            }
+            <p class="meta">
+              <span class="tipo">{{ item.tipo === 'serie' ? 'Serie' : 'Película' }}</span>
+              @if (item.anio) {
+                <span>{{ item.anio }}</span>
+              }
+            </p>
 
             <label class="campo">
               Estado
@@ -70,7 +63,7 @@
               </select>
             </label>
 
-            @if (item.estado === 'vista') {
+            @if (permiteResena(item.estado)) {
               <label class="campo">
                 Mi calificación
                 <select (change)="calificar(item, $any($event.target).value)" [disabled]="ocupado() === item.id">
@@ -89,7 +82,7 @@
                 Guardar reseña
               </button>
             } @else {
-              <p class="nota">Podrás calificarla y dejar una reseña cuando la marques como vista.</p>
+              <p class="nota">Podrás calificarla y dejar una reseña cuando la marques como «Completado».</p>
             }
 
             <button type="button" class="quitar" (click)="quitar(item)" [disabled]="ocupado() === item.id">

@@ -3,6 +3,13 @@
   "version": "0.2.0",
   "configurations": [
     {
+      "type": "java",
+      "name": "SpringPracticaApplication",
+      "request": "launch",
+      "mainClass": "com.example.spring_practica.SpringPracticaApplication",
+      "projectName": "spring-practica"
+    },
+    {
       "name": "ng serve",
       "type": "chrome",
       "request": "launch",

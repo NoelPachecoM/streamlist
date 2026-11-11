@@ -1,13 +1,16 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Router } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import {
   AdministracionService,
   RegistroBitacora,
   ResenaAdmin,
-  RolId,
+  RolSpring,
   UsuarioAdmin,
 } from '../../servicios/administracion.service';
 import { AuthService } from '../../servicios/auth.service';
+import { mensajeDeError } from '../../spring/spring-api.service';
 
 type Seccion = 'usuarios' | 'resenas' | 'bitacora';
 
@@ -18,185 +21,155 @@ type Seccion = 'usuarios' | 'resenas' | 'bitacora';
 })
 export class Administracion implements OnInit {
   private readonly administracion = inject(AdministracionService);
+  private readonly router = inject(Router);
   protected readonly auth = inject(AuthService);
 
   protected readonly seccion = signal<Seccion>('usuarios');
   protected readonly consulta = signal('');
-  protected readonly consultaResenas = signal('');
   protected readonly aviso = signal('');
   protected readonly error = signal('');
-  protected readonly guardando = signal<string | null>(null);
+  protected readonly cargando = signal(true);
+  protected readonly guardando = signal<number | null>(null);
 
   protected readonly usuarios = signal<UsuarioAdmin[]>([]);
-  protected readonly cargando = signal(true);
-
   protected readonly resenas = signal<ResenaAdmin[]>([]);
-  protected readonly cargandoResenas = signal(false);
-
   protected readonly bitacora = signal<RegistroBitacora[]>([]);
-  protected readonly cargandoBitacora = signal(false);
+
+  protected readonly subtitulo = computed(() => {
+    switch (this.seccion()) {
+      case 'resenas':
+        return 'Reseñas escritas por los usuarios en sus listas.';
+      case 'bitacora':
+        return 'Acciones realizadas por los administradores.';
+      default:
+        return 'Cuentas y permisos registrados en el servidor.';
+    }
+  });
+
+  protected readonly contador = computed(() => {
+    switch (this.seccion()) {
+      case 'resenas':
+        return `${this.resenas().length} RESEÑAS`;
+      case 'bitacora':
+        return `${this.bitacora().length} REGISTROS`;
+      default:
+        return `${this.usuarios().length} CUENTAS`;
+    }
+  });
 
   protected readonly usuariosFiltrados = computed(() => {
     const texto = this.consulta().trim().toLocaleLowerCase();
-    return this.usuarios().filter((usuario) => {
-      return `${usuario.nombre} ${usuario.correo ?? ''}`.toLocaleLowerCase().includes(texto);
-    });
+    return this.usuarios().filter((u) =>
+      `${u.nombre} ${u.correo ?? ''}`.toLocaleLowerCase().includes(texto),
+    );
   });
 
   protected readonly resenasFiltradas = computed(() => {
-    const texto = this.consultaResenas().trim().toLocaleLowerCase();
-    return this.resenas().filter((resena) => {
-      return `${resena.usuarioNombre} ${resena.usuarioCorreo ?? ''} ${resena.titulo} ${resena.resena}`
-        .toLocaleLowerCase()
-        .includes(texto);
-    });
-  });
-
-  protected readonly resumen = computed(() => {
-    switch (this.seccion()) {
-      case 'resenas':
-        return {
-          subtitulo: 'Reseñas escritas por los usuarios en sus listas.',
-          conteo: `${this.resenas().length} RESEÑAS`,
-        };
-      case 'bitacora':
-        return {
-          subtitulo: 'Acciones realizadas por los administradores.',
-          conteo: `${this.bitacora().length} REGISTROS`,
-        };
-      default:
-        return {
-          subtitulo: 'Cuentas y permisos registrados en el servidor.',
-          conteo: `${this.usuarios().length} CUENTAS`,
-        };
-    }
+    const texto = this.consulta().trim().toLocaleLowerCase();
+    return this.resenas().filter((r) =>
+      `${r.usuario} ${r.correo ?? ''} ${r.titulo} ${r.resena}`.toLocaleLowerCase().includes(texto),
+    );
   });
 
   ngOnInit(): void {
-    void this.cargarUsuarios();
+    void this.cargar();
   }
 
-  protected abrirSeccion(seccion: Seccion): void {
+  protected async cambiarSeccion(seccion: Seccion): Promise<void> {
+    if (this.seccion() === seccion) return;
     this.seccion.set(seccion);
+    this.consulta.set('');
     this.aviso.set('');
-    this.error.set('');
-    if (seccion === 'resenas') void this.cargarResenas();
-    if (seccion === 'bitacora') void this.cargarBitacora();
+    await this.cargar();
   }
 
-  protected etiquetaRol(rolId: RolId): string {
-    return rolId === 1 ? 'Administrador' : 'Usuario';
+  protected etiquetaRol(rol: RolSpring | null): string {
+    return rol === 'ROLE_ADMIN' ? 'Administrador' : 'Usuario';
+  }
+
+  protected esMiCuenta(usuario: UsuarioAdmin): boolean {
+    return String(usuario.id) === this.auth.perfil()?.id;
   }
 
   protected etiquetaTipo(tipo: string): string {
-    return tipo === 'pelicula' ? 'Película' : tipo === 'serie' ? 'Serie' : tipo;
+    return tipo === 'serie' ? 'Serie' : 'Película';
   }
 
-  protected etiquetaAccion(accion: string): string {
-    switch (accion) {
-      case 'rol_cambiado':
-        return 'Cambio de rol';
-      case 'resena_eliminada':
-        return 'Reseña eliminada';
-      default:
-        return accion;
-    }
-  }
-
-  protected describir(registro: RegistroBitacora): string {
-    const detalle = registro.detalle ?? {};
-    if (registro.accion === 'rol_cambiado') {
-      const nombre = String(detalle['nombre'] ?? registro.entidadId ?? 'una cuenta');
-      const anterior = this.etiquetaRol(detalle['rolAnterior'] as RolId);
-      const nuevo = this.etiquetaRol(detalle['rolNuevo'] as RolId);
-      return `Cambió el rol de ${nombre}: ${anterior} → ${nuevo}.`;
-    }
-    if (registro.accion === 'resena_eliminada') {
-      const usuario = String(detalle['usuario'] ?? 'un usuario');
-      const titulo = String(detalle['titulo'] ?? 'un título');
-      const texto = String(detalle['textoEliminado'] ?? '');
-      return `Eliminó la reseña de ${usuario} sobre "${titulo}". Texto: "${texto}".`;
-    }
-    return `${registro.accion} en ${registro.entidad}${registro.entidadId ? ` (${registro.entidadId})` : ''}.`;
-  }
-
-  protected formatearFecha(fecha: string): string {
-    return new Date(fecha).toLocaleString('es-MX', { dateStyle: 'medium', timeStyle: 'short' });
+  protected fecha(valor: string | null): string {
+    if (!valor) return '';
+    const d = new Date(valor);
+    return Number.isNaN(d.getTime())
+      ? ''
+      : d.toLocaleString('es-MX', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: 'numeric',
+          minute: '2-digit',
+        });
   }
 
   protected async cambiarRol(usuario: UsuarioAdmin): Promise<void> {
-    const rolId: RolId = usuario.rolId === 1 ? 2 : 1;
+    const nuevo: RolSpring = usuario.rol === 'ROLE_ADMIN' ? 'ROLE_CLIENTE' : 'ROLE_ADMIN';
     this.guardando.set(usuario.id);
     this.aviso.set('');
     this.error.set('');
     try {
-      const actualizado = await firstValueFrom(this.administracion.cambiarRol(usuario.id, rolId));
-      this.usuarios.update((usuarios) =>
-        usuarios.map((actual) => (actual.id === actualizado.id ? actualizado : actual)),
-      );
-      this.aviso.set(`Rol actualizado para ${actualizado.nombre}.`);
-    } catch {
-      this.error.set('No se pudo actualizar el rol. Verifica tu sesión e inténtalo de nuevo.');
+      const actualizado = await firstValueFrom(this.administracion.cambiarRol(usuario.id, nuevo));
+      this.usuarios.update((lista) => lista.map((u) => (u.id === actualizado.id ? actualizado : u)));
+      this.aviso.set(`Rol actualizado para ${actualizado.nombre}: ahora es ${this.etiquetaRol(actualizado.rol)}.`);
+    } catch (e) {
+      this.manejarError(e);
     } finally {
       this.guardando.set(null);
     }
   }
 
-  protected async eliminarResena(resena: ResenaAdmin): Promise<void> {
-    const confirmado = confirm(
-      `¿Eliminar el texto de la reseña de ${resena.usuarioNombre} sobre "${resena.titulo}"? La calificación se conserva.`,
-    );
-    if (!confirmado) return;
-
+  protected async eliminarTexto(resena: ResenaAdmin): Promise<void> {
+    if (!window.confirm(`¿Eliminar el texto de la reseña de ${resena.usuario} sobre «${resena.titulo}»?`)) return;
     this.guardando.set(resena.id);
     this.aviso.set('');
     this.error.set('');
     try {
-      await firstValueFrom(this.administracion.eliminarResena(resena.id));
-      this.resenas.update((resenas) => resenas.filter((actual) => actual.id !== resena.id));
-      this.aviso.set('Reseña eliminada y registrada en la bitácora.');
-    } catch {
-      this.error.set('No se pudo eliminar la reseña. Verifica tu sesión e inténtalo de nuevo.');
+      await firstValueFrom(this.administracion.eliminarTextoResena(resena.id));
+      this.resenas.update((lista) => lista.filter((r) => r.id !== resena.id));
+      this.aviso.set('Texto de la reseña eliminado. Quedó anotado en la bitácora.');
+    } catch (e) {
+      this.manejarError(e);
     } finally {
       this.guardando.set(null);
     }
   }
 
-  protected esMiCuenta(usuario: UsuarioAdmin): boolean {
-    return usuario.id === this.auth.perfil()?.id;
-  }
-
-  private async cargarUsuarios(): Promise<void> {
+  private async cargar(): Promise<void> {
     this.cargando.set(true);
     this.error.set('');
     try {
-      this.usuarios.set(await firstValueFrom(this.administracion.obtenerUsuarios()));
-    } catch {
-      this.error.set('No se pudieron cargar las cuentas reales. Verifica permisos y conexión.');
+      switch (this.seccion()) {
+        case 'usuarios':
+          this.usuarios.set(await firstValueFrom(this.administracion.obtenerUsuarios()));
+          break;
+        case 'resenas':
+          this.resenas.set(await firstValueFrom(this.administracion.obtenerResenas()));
+          break;
+        case 'bitacora':
+          this.bitacora.set(await firstValueFrom(this.administracion.obtenerBitacora()));
+          break;
+      }
+    } catch (e) {
+      this.manejarError(e);
     } finally {
       this.cargando.set(false);
     }
   }
 
-  private async cargarResenas(): Promise<void> {
-    this.cargandoResenas.set(true);
-    try {
-      this.resenas.set(await firstValueFrom(this.administracion.obtenerResenas()));
-    } catch {
-      this.error.set('No se pudieron cargar las reseñas. Verifica permisos y conexión.');
-    } finally {
-      this.cargandoResenas.set(false);
-    }
-  }
-
-  private async cargarBitacora(): Promise<void> {
-    this.cargandoBitacora.set(true);
-    try {
-      this.bitacora.set(await firstValueFrom(this.administracion.obtenerBitacora()));
-    } catch {
-      this.error.set('No se pudo cargar la bitácora. Verifica que la tabla exista y que tengas permisos.');
-    } finally {
-      this.cargandoBitacora.set(false);
+  /** Si Spring dice que ya no eres administrador (cambio en la base), se actualiza la sesión. */
+  private manejarError(e: unknown): void {
+    this.error.set(mensajeDeError(e));
+    if (e instanceof HttpErrorResponse && (e.status === 401 || e.status === 403)) {
+      void this.auth.cargarPerfil().then((perfil) => {
+        if (perfil?.rolId !== 1) void this.router.navigate(['/buscar']);
+      });
     }
   }
 }
