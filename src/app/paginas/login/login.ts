@@ -1,6 +1,6 @@
 import { Component, OnDestroy, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService } from '../../servicios/auth.service';
 
 type ModoAcceso = 'login' | 'registro';
@@ -31,6 +31,13 @@ export class Login implements OnDestroy {
   protected readonly mensaje = signal('');
   protected readonly aviso = signal('');
   protected readonly cargando = signal(false);
+
+  /** Aviso al llegar desde Mi cuenta después de cambiar la contraseña (?aviso=password). */
+  protected readonly avisoLlegada = signal(
+    inject(ActivatedRoute).snapshot.queryParamMap.get('aviso') === 'password'
+      ? 'Tu contraseña se cambió. Inicia sesión con tu contraseña nueva.'
+      : '',
+  );
 
   private solicitudId: number | null = null;
   private temporizador?: ReturnType<typeof setInterval>;
