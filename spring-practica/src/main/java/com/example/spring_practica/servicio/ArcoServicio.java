@@ -74,12 +74,14 @@ public class ArcoServicio {
     public ArcoRespuesta cambiarPassword(ArcoPeticion p) {
         Usuario usuario = verificarCorreoONombre(p);
         exigir(p.getPasswordNueva(), "passwordNueva");
+        validarPasswordNueva(p.getPasswordNueva());
         if (contrasenas.coincide(p.getPasswordNueva(), usuario.getPassword())) {
             throw new ArcoException(HttpStatus.BAD_REQUEST,
                     "La password nueva debe ser diferente a la actual");
         }
         usuario.setPassword(contrasenas.cifrar(p.getPasswordNueva()));
         usuarioRepo.save(usuario);
+        sesiones.cerrarTodas(usuario.getId()); // por seguridad: hay que volver a entrar con la nueva
         SolicitudArco solicitud = registrar(usuario, RECTIFICACION, "Cambio de password", "COMPLETADO");
         return new ArcoRespuesta("Password actualizada", solicitud.getId(), null);
     }
@@ -247,7 +249,7 @@ public class ArcoServicio {
         exigir(p.getNombre(), "nombre");
         Usuario usuario = usuarioRepo.findByEmail(p.getCorreo()).orElse(null);
         if (usuario == null || !usuario.getNombre().equals(p.getNombre())) {
-            throw credencialesIncorrectas();
+            throw new ArcoException(HttpStatus.FORBIDDEN, "El correo y el nombre no coinciden");
         }
         comprobarActivo(usuario);
 
@@ -273,6 +275,7 @@ public class ArcoServicio {
         exigir(p.getSolicitudId(), "solicitudId");
         exigir(p.getToken(), "token");
         exigir(p.getPasswordNueva(), "passwordNueva");
+        validarPasswordNueva(p.getPasswordNueva());
 
         CodigoVerificacion codigo = validarCodigo(p.getSolicitudId(), TIPO_TOKEN, p.getToken());
         SolicitudArco solicitud = codigo.getSolicitud();
@@ -373,8 +376,21 @@ public class ArcoServicio {
         }
     }
 
+    // 403 y no 401: el 401 significa "tu sesion ya no sirve" y hace que la pagina cierre la sesion.
+    // Una contrasena mal escrita en Mi cuenta solo debe mostrar el aviso, sin sacar a la persona.
     private ArcoException credencialesIncorrectas() {
-        return new ArcoException(HttpStatus.UNAUTHORIZED, "Credenciales incorrectas");
+        return new ArcoException(HttpStatus.FORBIDDEN, "La contrasena actual no es correcta");
+    }
+
+    private void validarPasswordNueva(String password) {
+        if (password.length() < 8) {
+            throw new ArcoException(HttpStatus.BAD_REQUEST,
+                    "La contrasena nueva debe tener al menos 8 caracteres");
+        }
+        if (password.length() > 72) { // BCrypt solo usa los primeros 72 bytes
+            throw new ArcoException(HttpStatus.BAD_REQUEST,
+                    "La contrasena nueva puede tener como maximo 72 caracteres");
+        }
     }
 
     // =====================================================================
