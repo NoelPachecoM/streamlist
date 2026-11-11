@@ -37,7 +37,7 @@
       <h2>Editar mi cuenta</h2>
       <p class="sub">Abre solo lo que quieras cambiar. Te pediremos tu contraseña actual para confirmar que eres tú.</p>
 
-      <details class="opcion" name="ajustes">
+      <details class="opcion" name="ajustes" (toggle)="alAbrirSeccion($event)">
         <summary>
           <span class="icono" aria-hidden="true">✎</span>
           <span class="texto"><strong>Cambiar nombre</strong><small>Cómo te ven los demás en las reseñas</small></span>
@@ -48,13 +48,16 @@
             <input name="nombreNuevo" type="text" [(ngModel)]="nombreNuevo" maxlength="100" autocomplete="name" />
           </label>
           <label>Contraseña actual
-            <input name="passwordNombre" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+            <input name="passwordNombre" type="password" [(ngModel)]="passwordNombre" readonly (pointerdown)="permitirEscribir($event)" (focus)="permitirEscribir($event)" autocomplete="off" />
           </label>
-          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarNombre()">Guardar nombre</button>
+          <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="cambiarNombre()">Guardar nombre</button>
+          @if (avisoEn('nombre')) {
+            <p class="aviso-seccion" [class.error]="error()" [attr.role]="error() ? 'alert' : 'status'">{{ error() || mensaje() }}</p>
+          }
         </div>
       </details>
 
-      <details class="opcion" name="ajustes">
+      <details class="opcion" name="ajustes" (toggle)="alAbrirSeccion($event)">
         <summary>
           <span class="icono" aria-hidden="true">☎</span>
           <span class="texto"><strong>Cambiar teléfono</strong><small>{{ datos()?.telefono || 'Sin teléfono registrado' }}</small></span>
@@ -65,13 +68,16 @@
             <input name="telefonoNuevo" type="tel" [(ngModel)]="telefonoNuevo" maxlength="20" autocomplete="tel" />
           </label>
           <label>Contraseña actual
-            <input name="passwordTelefono" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+            <input name="passwordTelefono" type="password" [(ngModel)]="passwordTelefono" readonly (pointerdown)="permitirEscribir($event)" (focus)="permitirEscribir($event)" autocomplete="off" />
           </label>
-          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarTelefono()">Guardar teléfono</button>
+          <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="cambiarTelefono()">Guardar teléfono</button>
+          @if (avisoEn('telefono')) {
+            <p class="aviso-seccion" [class.error]="error()" [attr.role]="error() ? 'alert' : 'status'">{{ error() || mensaje() }}</p>
+          }
         </div>
       </details>
 
-      <details class="opcion" name="ajustes" [open]="pasoCorreo() !== 'inicio'">
+      <details class="opcion" name="ajustes" (toggle)="alAbrirSeccion($event)" [open]="pasoCorreo() !== 'inicio'">
         <summary>
           <span class="icono" aria-hidden="true">✉</span>
           <span class="texto"><strong>Cambiar correo</strong><small>Se confirma con un código en cada correo</small></span>
@@ -89,9 +95,9 @@
                 <input name="correoNuevo" type="email" [(ngModel)]="correoNuevo" autocomplete="email" />
               </label>
               <label>Contraseña actual
-                <input name="passwordCorreo" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+                <input name="passwordCorreo" type="password" [(ngModel)]="passwordCorreo" readonly (pointerdown)="permitirEscribir($event)" (focus)="permitirEscribir($event)" autocomplete="off" />
               </label>
-              <button type="button" class="principal" [disabled]="cargando()" (click)="pedirCambioCorreo()">Enviar código</button>
+              <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="pedirCambioCorreo()">Enviar código</button>
             }
             @case ('actual') {
               <p class="sub">Escribe el código que enviamos a tu correo actual (<strong>{{ api.usuario()?.correo }}</strong>).</p>
@@ -99,8 +105,8 @@
                 <input name="codigoCorreoActual" type="text" [(ngModel)]="codigoCorreo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
               </label>
               <div class="fila">
-                <button type="button" class="principal" [disabled]="cargando()" (click)="confirmarCorreoActual()">Confirmar</button>
-                <button type="button" class="secundario" [disabled]="cargando()" (click)="cancelarCambioCorreo()">Cancelar</button>
+                <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="confirmarCorreoActual()">Confirmar</button>
+                <button type="button" class="secundario" [disabled]="cargando() || segundosParaSalir() > 0" (click)="cancelarCambioCorreo()">Cancelar</button>
               </div>
             }
             @case ('nuevo') {
@@ -109,15 +115,18 @@
                 <input name="codigoCorreoNuevo" type="text" [(ngModel)]="codigoCorreo" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
               </label>
               <div class="fila">
-                <button type="button" class="principal" [disabled]="cargando()" (click)="confirmarCorreoNuevo()">Cambiar correo</button>
-                <button type="button" class="secundario" [disabled]="cargando()" (click)="cancelarCambioCorreo()">Cancelar</button>
+                <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="confirmarCorreoNuevo()">Cambiar correo</button>
+                <button type="button" class="secundario" [disabled]="cargando() || segundosParaSalir() > 0" (click)="cancelarCambioCorreo()">Cancelar</button>
               </div>
             }
+          }
+          @if (avisoEn('correo')) {
+            <p class="aviso-seccion" [class.error]="error()" [attr.role]="error() ? 'alert' : 'status'">{{ error() || mensaje() }}</p>
           }
         </div>
       </details>
 
-      <details class="opcion" name="ajustes">
+      <details class="opcion" name="ajustes" (toggle)="alAbrirSeccion($event)">
         <summary>
           <span class="icono" aria-hidden="true">🔒</span>
           <span class="texto"><strong>Cambiar contraseña</strong><small>Usa al menos 8 caracteres</small></span>
@@ -125,16 +134,28 @@
         </summary>
         <div class="contenido">
           <label>Contraseña actual
-            <input name="passwordActualCambio" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+            <input name="passwordActualCambio" type="password" [(ngModel)]="passwordCambio" readonly (pointerdown)="permitirEscribir($event)" (focus)="permitirEscribir($event)" autocomplete="off" />
           </label>
           <label>Contraseña nueva
-            <input name="passwordNueva" type="password" [(ngModel)]="passwordNueva" autocomplete="new-password" />
+            <input name="passwordNueva" type="password" [(ngModel)]="passwordNueva" minlength="8" autocomplete="new-password" />
           </label>
-          <button type="button" class="principal" [disabled]="cargando()" (click)="cambiarPassword()">Guardar contraseña</button>
+          <label>Confirma la contraseña nueva
+            <input name="passwordConfirmacion" type="password" [(ngModel)]="passwordConfirmacion" minlength="8" autocomplete="new-password" />
+          </label>
+          <button type="button" class="principal" [disabled]="cargando() || segundosParaSalir() > 0" (click)="cambiarPassword()">Guardar contraseña</button>
+          @if (avisoEn('password')) {
+            <div class="aviso-seccion" [class.error]="error()" [attr.role]="error() ? 'alert' : 'status'">
+              <p>{{ error() || mensaje() }}</p>
+              @if (segundosParaSalir() > 0) {
+                <p>Cerrando sesión en {{ segundosParaSalir() }} s...</p>
+                <button type="button" class="principal" (click)="salirTrasCambio()">Ir a iniciar sesión ahora</button>
+              }
+            </div>
+          }
         </div>
       </details>
 
-      <details class="opcion peligro" name="ajustes" [open]="solicitudCancelacion() !== null">
+      <details class="opcion peligro" name="ajustes" (toggle)="alAbrirSeccion($event)" [open]="solicitudCancelacion() !== null">
         <summary>
           <span class="icono" aria-hidden="true">⚠</span>
           <span class="texto"><strong>Cancelar suscripción</strong><small>Te mandamos un código al correo (vale 10 minutos)</small></span>
@@ -143,14 +164,17 @@
         <div class="contenido">
           @if (solicitudCancelacion() === null) {
             <label>Contraseña actual
-              <input name="passwordCancelar" type="password" [(ngModel)]="passwordActual" autocomplete="current-password" />
+              <input name="passwordCancelar" type="password" [(ngModel)]="passwordCancelar" readonly (pointerdown)="permitirEscribir($event)" (focus)="permitirEscribir($event)" autocomplete="off" />
             </label>
-            <button type="button" class="peligro-boton" [disabled]="cargando()" (click)="pedirCodigoCancelacion()">Pedir código de cancelación</button>
+            <button type="button" class="peligro-boton" [disabled]="cargando() || segundosParaSalir() > 0" (click)="pedirCodigoCancelacion()">Pedir código de cancelación</button>
           } @else {
             <label>Código de 6 dígitos
               <input name="codigoCancelacion" type="text" [(ngModel)]="codigoCancelacion" inputmode="numeric" maxlength="6" />
             </label>
-            <button type="button" class="peligro-boton" [disabled]="cargando()" (click)="confirmarCancelacion()">Confirmar cancelación</button>
+            <button type="button" class="peligro-boton" [disabled]="cargando() || segundosParaSalir() > 0" (click)="confirmarCancelacion()">Confirmar cancelación</button>
+          }
+          @if (avisoEn('cancelar')) {
+            <p class="aviso-seccion" [class.error]="error()" [attr.role]="error() ? 'alert' : 'status'">{{ error() || mensaje() }}</p>
           }
         </div>
       </details>
@@ -162,13 +186,13 @@
     @if (cargando()) {
       <p class="aviso info">Procesando...</p>
     }
-    @if (mensaje()) {
+    @if (mensaje() && seccionAviso() === null) {
       <p class="aviso ok" role="status">
         {{ mensaje() }}
         <button type="button" (click)="mensaje.set('')" aria-label="Cerrar aviso">✕</button>
       </p>
     }
-    @if (error()) {
+    @if (error() && seccionAviso() === null) {
       <p class="aviso error" role="alert">
         {{ error() }}
         <button type="button" (click)="error.set('')" aria-label="Cerrar aviso">✕</button>
