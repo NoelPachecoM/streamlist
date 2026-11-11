@@ -5,6 +5,10 @@
       <p>Tu próximo maratón comienza aquí.</p>
     </header>
 
+    @if (avisoLlegada() && !auth.usuario()) {
+      <p class="aviso" role="status">{{ avisoLlegada() }}</p>
+    }
+
     @if (auth.usuario(); as usuario) {
       <section class="sesion-activa">
         <h2>¡Bienvenido!</h2>
